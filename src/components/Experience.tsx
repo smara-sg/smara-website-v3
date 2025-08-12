@@ -3,9 +3,21 @@ import { QrCode } from 'lucide-react';
 
 const Experience = () => {
   const filters = [
-    { name: "Flowing Waters", description: "Gentle ripples with oceanic sounds" },
-    { name: "Celestial Garden", description: "Blooming patterns with nature ambience" },
-    { name: "Sacred Geometry", description: "Mandala formations with meditation tones" }
+    { 
+      name: "Night Sky", 
+      description: "A gentle, calming night sky.",
+      qrImage: "/images/nightsky-qr.png"
+    },
+    { 
+      name: "Door To Beach", 
+      description: "Doorway to a serene paradise.",
+      qrImage: "/images/doortobeach-qr.png"
+    },
+    { 
+      name: "Flowers", 
+      description: "Whimsical blooms within and around you.",
+      qrImage: "/images/flowers-qr.png"
+    }
   ];
 
   const steps = [
@@ -67,8 +79,12 @@ const Experience = () => {
           {filters.map((filter, index) => (
             <div key={index} className="glass-card rounded-2xl p-8 hover-lift animate-fade-in">
               <div className="flex justify-center mb-6">
-                <div className="w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center animate-float">
-                  <QrCode size={48} className="text-gray-400" />
+                <div className="w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={filter.qrImage} 
+                    alt={`${filter.name} QR Code`} 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
               <h3 className="text-xl font-medium text-white mb-3 text-center">{filter.name}</h3>

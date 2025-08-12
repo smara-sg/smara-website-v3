@@ -70,7 +70,8 @@ const AboutPage = () => {
       name: "Zhi Han",
       role: "Vibe Coder & Marketer",
       description: "A digital marketer and vibe coder who helps bring ideas to life.",
-      image: "/images/hanpfp.jpeg"
+      image: "/images/hanpfp.jpg"
+    }
   ];
 
   return (
