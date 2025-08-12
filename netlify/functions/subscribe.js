@@ -1,5 +1,6 @@
 const { Resend } = require('resend');
-const fetch = require('node-fetch'); // Make sure to add node-fetch to your dependencies
+// Using global fetch available in Node.js 18+
+const fetch = globalThis.fetch || require('node-fetch');
 
 exports.handler = async (event, context) => {
   // Handle CORS preflight requests
@@ -74,6 +75,7 @@ exports.handler = async (event, context) => {
     }
 
     // Send the subscription email
+    console.log('Sending email with Resend...');
     const response = await resend.emails.send({
       from: 'SMARA <noreply@smara.online>',
       to: ['hello@smara.online'],
@@ -100,7 +102,13 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ success: true }),
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Detailed error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code,
+      response: error.response?.data
+    });
 
     return {
       statusCode: 500,
