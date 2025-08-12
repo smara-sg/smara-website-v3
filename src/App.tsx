@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ScrollToTop } from './utils/scrollToTop';
 import Navigation from './components/Navigation';
 import HeroSection from './components/HeroSection';
 import WhatIsSmara from './components/WhatIsSmara';
@@ -9,35 +10,33 @@ import EventsPage from './components/EventsPage';
 import AboutPage from './components/AboutPage';
 import GalleryPage from './components/GalleryPage';
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'gallery':
-        return <GalleryPage onPageChange={setCurrentPage} />;
-      case 'events':
-        return <EventsPage />;
-      case 'about':
-        return <AboutPage />;
-      default:
-        return (
-          <>
-            <HeroSection />
-            <WhatIsSmara />
-            <Experience />
-            <Testimonials />
-            <Community />
-          </>
-        );
-    }
-  };
-
+function Home() {
   return (
-    <div className="min-h-screen">
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
-      {renderPage()}
-    </div>
+    <>
+      <HeroSection />
+      <WhatIsSmara />
+      <Experience />
+      <Testimonials />
+      <Community />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <div className="min-h-screen">
+        <Navigation />
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<Home />} /> {/* Fallback to home */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

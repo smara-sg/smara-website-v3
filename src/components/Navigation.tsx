@@ -1,54 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 
-interface NavigationProps {
-  currentPage: string;
-  onPageChange: (page: string) => void;
-}
+export default function Navigation() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <button
-              onClick={() => onPageChange('home')}
-              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+            <NavLink 
+              to="/" 
+              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
+              onClick={closeMenu}
             >
               Smara
-            </button>
+            </NavLink>
           </div>
-          <div className="flex items-center space-x-8">
-            <button
-              onClick={() => onPageChange('gallery')}
-              className={`px-3 py-2 text-sm font-medium ${
-                currentPage === 'gallery'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+          <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <NavLink
+              to="/gallery"
+              className={({ isActive }) => 
+                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  isActive 
+                    ? 'border-blue-500 text-gray-900' 
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                }`
+              }
+              onClick={closeMenu}
             >
               Gallery
-            </button>
-            <button
-              onClick={() => onPageChange('events')}
-              className={`px-3 py-2 text-sm font-medium ${
-                currentPage === 'events'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+            </NavLink>
+            <NavLink
+              to="/events"
+              className={({ isActive }) => 
+                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  isActive 
+                    ? 'border-blue-500 text-gray-900' 
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                }`
+              }
+              onClick={closeMenu}
             >
               Events
-            </button>
-            <button
-              onClick={() => onPageChange('about')}
-              className={`px-3 py-2 text-sm font-medium ${
-                currentPage === 'about'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) => 
+                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  isActive 
+                    ? 'border-blue-500 text-gray-900' 
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                }`
+              }
+              onClick={closeMenu}
             >
               About
-            </button>
+            </NavLink>
           </div>
         </div>
       </div>

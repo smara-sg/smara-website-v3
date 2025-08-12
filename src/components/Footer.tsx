@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Mail, Instagram, Music } from 'lucide-react';
+import { scrollToTop } from '../utils/scrollToTop';
 
 const Footer = () => {
   return (
@@ -24,22 +24,38 @@ const Footer = () => {
             <h4 className="text-lg font-medium">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link to="/" className="hover:text-white transition-colors duration-200">
+                <Link 
+                  to="/" 
+                  className="hover:text-white transition-colors duration-200"
+                  onClick={scrollToTop}
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/gallery" className="hover:text-white transition-colors duration-200">
+                <Link 
+                  to="/gallery" 
+                  className="hover:text-white transition-colors duration-200"
+                  onClick={scrollToTop}
+                >
                   Gallery
                 </Link>
               </li>
               <li>
-                <Link to="/events" className="hover:text-white transition-colors duration-200">
+                <Link 
+                  to="/events" 
+                  className="hover:text-white transition-colors duration-200"
+                  onClick={scrollToTop}
+                >
                   Events
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="hover:text-white transition-colors duration-200">
+                <Link 
+                  to="/about" 
+                  className="hover:text-white transition-colors duration-200"
+                  onClick={scrollToTop}
+                >
                   About
                 </Link>
               </li>

@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Mail } from 'lucide-react';
 import Footer from './Footer';
 
-interface GalleryPageProps {
-  onPageChange: (page: string) => void;
-}
-
-const GalleryPage = ({ onPageChange }: GalleryPageProps) => {
+const GalleryPage = () => {
   const [currentArtworkIndex, setCurrentArtworkIndex] = useState(0);
 
   const artworks = [
@@ -132,7 +128,6 @@ const GalleryPage = ({ onPageChange }: GalleryPageProps) => {
       {/* Contact Button - Outside Container and Centered */}
       <div className="text-center mt-12 mb-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
-          onClick={() => onPageChange('about')}
           className="gradient-emerald hover-lift text-white px-8 py-4 rounded-full font-medium transition-all duration-200 flex items-center justify-center space-x-2 mx-auto"
         >
           <Mail size={20} />

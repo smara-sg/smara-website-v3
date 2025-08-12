@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Heart, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { Heart, Mail } from 'lucide-react';
 import Footer from './Footer';
 
 const AboutPage = () => {
