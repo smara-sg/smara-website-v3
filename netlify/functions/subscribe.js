@@ -1,6 +1,6 @@
 const { Resend } = require('resend');
-// Using global fetch available in Node.js 18+
-const fetch = globalThis.fetch || require('node-fetch');
+// Use node-fetch with a more compatible approach
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 exports.handler = async (event, context) => {
   // Handle CORS preflight requests
