@@ -64,14 +64,13 @@ const AboutPage = () => {
       name: "Alvin Goh",
       role: "AR Developer & Designer",
       description: "Marcus brings the visual magic to life, creating the beautiful AR filters that transform your meditation experience into an artistic journey.",
-      image: "https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=400"
+      image: "/images/alvinpfp.jpeg"
     },
     {
       name: "Zhi Han",
       role: "Vibe Coder & Marketer",
-      description: "A clinical psychologist specializing in mindfulness-based interventions, Dr. Patel ensures our practices are grounded in scientific research.",
-      image: "https://images.pexels.com/photos/3763152/pexels-photo-3763152.jpeg?auto=compress&cs=tinysrgb&w=400"
-    }
+      description: "A digital marketer and vibe coder who helps bring ideas to life.",
+      image: "/images/hanpfp.jpeg"
   ];
 
   return (
