@@ -57,19 +57,19 @@ const AboutPage = () => {
     {
       name: "Clarence Ho",
       role: "Founder & Artist",
-      description: "An artist specialising in 3D or interactive illusion art, augmented reality art, holograms, projection mapping, caricaturing and cartoons,art and design for over 20 yearsy.",
+      description: "An artist specialising in 3D and interactive illusion art, augmented reality art, holograms, projection mapping, caricaturing and cartoons, with over 20 years of experience under his belt.",
       image: "/images/clarencepfp.jpeg"
     },
     {
       name: "Alvin Goh",
       role: "AR Developer & Designer",
-      description: "Marcus brings the visual magic to life, creating the beautiful AR filters that transform your meditation experience into an artistic journey.",
+      description: "Alvin brings the visual magic to life, creating the beautiful AR filters and animations that transform your meditation experience into an artistic journey.",
       image: "/images/alvinpfp.jpeg"
     },
     {
       name: "Zhi Han",
       role: "Vibe Coder & Marketer",
-      description: "A digital marketer and vibe coder who helps bring ideas to life.",
+      description: "A digital marketer and vibe coder who helps bring ideas to life. He brings technical and marketing expertise to the team.",
       image: "/images/hanpfp.jpg"
     }
   ];

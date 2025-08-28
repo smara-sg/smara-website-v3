@@ -8,33 +8,33 @@ const GalleryPage = () => {
   const artworks = [
     {
       id: 1,
-      title: "Flowing Waters",
-      description: "A mesmerizing piece that captures the eternal dance of water, originally painted with fluid acrylics and transformed into a gentle, rippling AR experience that responds to your breath and movement.",
-      image: "https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=800"
+      title: "Enchanted Lavender",
+      description: "A dreamy forest bathed in soft light, where lavender blooms line the edges of a winding path. The air feels alive with growth and quiet abundance, each flower standing as a symbol of renewal and harmony within nature's embrace.",
+      image: "/images/enchanted_lavendar.jpg"
     },
     {
       id: 2,
-      title: "Celestial Garden",
-      description: "Born from mixed media collage work, this piece blooms with organic patterns and celestial motifs. The digital animation brings the garden to life, with petals that unfold as you gaze deeper into your reflection.",
-      image: "https://images.pexels.com/photos/1323712/pexels-photo-1323712.jpeg?auto=compress&cs=tinysrgb&w=800"
+      title: "Clear Blue",
+      description: "A tranquil scene of a beach hut poised above crystalline waters, with endless blue skies melting seamlessly into the sea. It is a vision of pure escape, where serenity and clarity stretch as far as the horizon.",
+      image: "/images/clear_blue.png"
     },
     {
       id: 3,
-      title: "Sacred Geometry",
-      description: "Originally created with precise ink drawings and geometric constructions, this mandala-inspired artwork transforms into a living meditation tool, with patterns that pulse and evolve in harmony with your inner state.",
-      image: "https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg?auto=compress&cs=tinysrgb&w=800"
+      title: "Godray",
+      description: "Light breaks through drifting clouds and descends upon a vast valley, illuminating the land with a celestial glow. The scene evokes a quiet reverence, as if nature itself were touched by something divine.",
+      image: "/images/godray_valley.png"
     },
     {
       id: 4,
-      title: "Ocean Dreams",
-      description: "This ethereal seascape began as an oil painting capturing the infinite horizon. The AR version creates waves of color that ebb and flow, inviting you to dive deep into contemplative stillness.",
-      image: "https://images.pexels.com/photos/1323712/pexels-photo-1323712.jpeg?auto=compress&cs=tinysrgb&w=800"
+      title: "Midnight Pond",
+      description: "Under the glow of a full moon, a pond shimmers with an otherworldly luminescence. Silhouettes of fish glide beneath the surface, while lotus blossoms float gracefully—an ethereal balance of stillness and life beneath the midnight sky.",
+      image: "/images/midnight_pond.png"
     },
     {
       id: 5,
-      title: "Forest Whispers",
-      description: "Inspired by nature walks and created with watercolor techniques, this piece brings the tranquility of ancient forests to your meditation practice, with leaves that dance gently in digital wind.",
-      image: "https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=800"
+      title: "Serene Seclusion",
+      description: "In the heart of a flowering forest rests a solitary bench, nestled beneath a canopy of pink blooms. Petals scatter across the ground like whispers of time, creating a sanctuary of gentle solitude and unspoken beauty.",
+      image: "/images/serene_seclusion.png"
     }
   ];
 
