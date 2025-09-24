@@ -54,7 +54,7 @@ const Experience = () => {
       <div 
         className="absolute inset-0 z-[-1]"
         style={{ 
-          backgroundImage: 'url(/images/smara3.jpg)',
+          backgroundImage: 'url(/images/smara3a.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -62,15 +62,15 @@ const Experience = () => {
         }}
       >
       </div>
-      <div className="absolute inset-0 bg-black/50 z-[-1]"></div>
+      {/* Removed dark overlay div */}
       
-      <div className="relative z-10 py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-8">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
             Your SMARA Experience
           </h2>
-          <p className="text-lg text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Experience self-gaze meditation with our specially designed AR filters.
+          <p className="text-xl text-white/90 max-w-3xl mx-auto [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+            A journey through art, technology, and self-discovery
           </p>
         </div>
 
@@ -87,15 +87,18 @@ const Experience = () => {
                   />
                 </div>
               </div>
-              <h3 className="text-xl font-medium text-white mb-3 text-center">{filter.name}</h3>
-              <p className="text-white text-center">{filter.description}</p>
+              <h3 className="text-xl font-medium text-white mb-3 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.name}</h3>
+              <p className="text-white text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.description}</p>
             </div>
           ))}
         </div>
 
         {/* How to Practice */}
-        <div className="max-w-3xl mx-auto">
-          <h3 className="text-3xl font-light text-white mb-12 text-center">How to Practice SMARA</h3>
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-16">
+          <h3 className="text-2xl md:text-3xl font-light text-white mb-8 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+            How to Practice SMARA
+          </h3>
+          
           <div className="space-y-8">
             {steps.map((step, index) => (
               <div key={index} className="flex items-start space-x-6">
@@ -105,8 +108,8 @@ const Experience = () => {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xl font-medium text-white mb-2">{step.title}</h4>
-                  <p className="text-gray-200 leading-relaxed">{step.description}</p>
+                  <h4 className="text-xl font-medium text-white mb-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.title}</h4>
+                  <p className="text-gray-200 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.description}</p>
                 </div>
               </div>
             ))}

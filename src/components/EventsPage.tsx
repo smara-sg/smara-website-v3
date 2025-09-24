@@ -31,7 +31,7 @@ const EventsPage = () => {
         "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800",
         "https://images.pexels.com/photos/3822621/pexels-photo-3822621.jpeg?auto=compress&cs=tinysrgb&w=800"
       ],
-      date: "Sep 1–30, 2025",
+      date: "Q4 2025",
       location: "Various Community Centres, Singapore"
     },
    

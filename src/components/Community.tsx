@@ -44,7 +44,7 @@ const Community = () => {
       <div 
         className="absolute inset-0 z-[-1]"
         style={{ 
-          backgroundImage: 'url(/images/smara3.jpg)',
+          backgroundImage: 'url(/images/smara3a.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -52,9 +52,9 @@ const Community = () => {
         }}
       >
       </div>
-      <div className="absolute inset-0 bg-black/50 z-[-1]"></div>
+      {/* Removed dark overlay div */}
       
-      <div className="relative z-10 py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-light text-white mb-8">
             Join Our Community
