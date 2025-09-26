@@ -23,9 +23,14 @@ export default function Navigation() {
           <div className="flex items-center">
             <NavLink 
               to="/" 
-              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
+              className="flex items-center text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
               onClick={closeMenu}
             >
+              <img 
+                src="/images/SMARA_icon.png" 
+                alt="SMARA Logo" 
+                className="h-8 w-auto mr-2" 
+              />
               SMARA
             </NavLink>
           </div>
