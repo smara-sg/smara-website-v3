@@ -51,13 +51,13 @@ const Testimonials = () => {
       </div>
       {/* Removed dark overlay div */}
       
-      <div className="relative z-10 py-20 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+            <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
               What People Are Saying
             </h2>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+            <p className="text-lg text-white max-w-3xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
               Hear from our community of mindfulness practitioners and art lovers
             </p>
           </div>
@@ -67,12 +67,12 @@ const Testimonials = () => {
                 <div className="flex justify-center mb-4">
                   <Quote className="w-8 h-8 text-emerald-400 animate-pulse-slow" />
                 </div>
-                <blockquote className="text-gray-200 leading-relaxed mb-4 text-center italic [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+                <blockquote className="text-white leading-relaxed mb-4 text-center italic [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                   "{testimonial.quote}"
                 </blockquote>
                 <div className="text-center">
-                  <p className="text-white font-medium [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{testimonial.author}</p>
-                  <p className="text-gray-300 text-sm [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{testimonial.location}</p>
+                  <p className="text-white font-medium [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.author}</p>
+                  <p className="text-gray-200 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.location}</p>
                 </div>
               </div>
             ))}
@@ -80,7 +80,7 @@ const Testimonials = () => {
           
           {/* Scroll indicator */}
           <div className="text-center mt-6">
-            <p className="text-gray-300 text-sm [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">← Scroll to read more testimonials →</p>
+            <p className="text-gray-200 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">← Scroll to read more testimonials →</p>
           </div>
         </div>
       </div>

@@ -36,15 +36,15 @@ const WhatIsSmara = () => {
       </div>
       {/* Removed dark overlay div */}
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
             What is SMARA?
           </h2>
-          <p className="text-lg text-gray-200 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
-              Self-gaze meditation is a mindfulness practice that involves a deep and direct gaze at one’s own reflection. It offers many benefits including
+          <p className="text-lg text-white leading-relaxed max-w-4xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
+            Self-gaze meditation is a mindfulness practice that involves a deep and direct gaze at one's own reflection. It offers many benefits including
 improving mental well-being and finding a sense of relaxation and calm. With SMARA, an AR filter layers generative art and calming soundscapes over your reflection, turning the screen into a gentle sanctuary for self-discovery.
-            </p>
+          </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-12">
               <div className="glass-card aspect-[4/3] rounded-lg overflow-hidden hover-lift">

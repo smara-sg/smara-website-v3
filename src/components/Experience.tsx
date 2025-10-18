@@ -64,13 +64,13 @@ const Experience = () => {
       </div>
       {/* Removed dark overlay div */}
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
             Your SMARA Experience
           </h2>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
-            A journey through art, technology, and self-discovery
+          <p className="text-lg text-white max-w-3xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
+            Experience the future of mindfulness with our AR-powered self-gaze meditation.
           </p>
         </div>
 

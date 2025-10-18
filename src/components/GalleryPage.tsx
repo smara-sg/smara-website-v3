@@ -4,6 +4,7 @@ import Footer from './Footer';
 
 const GalleryPage = () => {
   const [currentArtworkIndex, setCurrentArtworkIndex] = useState(0);
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
 
   const artworks = [
     {
@@ -50,6 +51,14 @@ const GalleryPage = () => {
     setCurrentArtworkIndex(index);
   };
 
+  const nextCarouselImage = () => {
+    setCurrentCarouselIndex((prev) => (prev + 1) % 4);
+  };
+
+  const prevCarouselImage = () => {
+    setCurrentCarouselIndex((prev) => prev === 0 ? 3 : prev - 1);
+  };
+
   const currentArtwork = artworks[currentArtworkIndex];
 
   return (
@@ -58,13 +67,80 @@ const GalleryPage = () => {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <h1 className="text-4xl md:text-5xl font-light text-gray-800 text-center">
-            Our Artwork
+            SMARA Artworks For Sale
           </h1>
+          <p className="text-lg text-gray-600 text-center mt-6 max-w-3xl mx-auto">
+            SMARA artworks do more than just promote mental wellbeing. They also function as affordable art pieces to beautify homes, offices, hospitals, and schools.
+            <br /><br />
+            Enquire on SMARA artworks at <a href="mailto:hello@smara.online" className="text-blue-600 hover:underline">hello@smara.online</a>.
+          </p>
         </div>
       </div>
 
-      {/* Carousel Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      {/* New Image Carousel */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative">
+          <div className="aspect-w-4 aspect-h-3 rounded-xl overflow-hidden shadow-lg">
+            <div className="relative h-0 pb-[75%] bg-gray-100">
+              {[1, 2, 3, 4].map((num) => (
+                <div 
+                  key={num}
+                  className={`absolute inset-0 transition-opacity duration-500 ${
+                    currentCarouselIndex + 1 === num ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <img 
+                    src={`/images/smarainplaces${num}.jpg`}
+                    alt={`SMARA in place ${num}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevCarouselImage}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+            aria-label="Previous image"
+          >
+            <ChevronLeft size={24} className="text-gray-700" />
+          </button>
+          <button
+            onClick={nextCarouselImage}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+            aria-label="Next image"
+          >
+            <ChevronRight size={24} className="text-gray-700" />
+          </button>
+          
+          {/* Navigation Dots */}
+          <div className="flex justify-center mt-4 space-x-2">
+            {[1, 2, 3, 4].map((num) => (
+              <button 
+                key={num}
+                onClick={() => setCurrentCarouselIndex(num - 1)}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  currentCarouselIndex + 1 === num ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+                aria-label={`View image ${num}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Description Text */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 text-center">
+        <p className="text-lg text-gray-700 leading-relaxed">
+          SMARA artworks offer calming visual beauty, making every physical space a wonderful living experience with themes that enhance overall ambiance, inspire moods and evoke memories. For offices and work places, these artworks shift focus away from daily stressors, encourage mental clarity and promote productivity.
+        </p>
+      </div>
+
+      {/* Artwork Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h2 className="text-3xl font-light text-gray-800 text-center mb-12">Other Artworks</h2>
         <div className="glass-card rounded-2xl overflow-hidden hover-lift animate-fade-in">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Image Section */}

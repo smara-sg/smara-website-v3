@@ -25,7 +25,7 @@ const EventsPage = () => {
     {
       id: 1,
       title: "SMARA In The Heartlands",
-      description: "Spot us at various Community Centres around Singapore, and discover the SMARA experience by scanning the QR on our stickers. An invitation to join us in this SMARA movement.",
+      description: "Spot us at various SMARA calming spaces around Singapore, and discover the SMARA experience by scanning the QR on our stickers. An invitation to join us in this SMARA movement.",
       images: [
         "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800",
         "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800",

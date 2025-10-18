@@ -42,7 +42,7 @@ export default function Navigation() {
               className={navLinkClass}
               onClick={closeMenu}
             >
-              Gallery
+              Artwork
             </NavLink>
             <NavLink
               to="/events"
@@ -91,7 +91,7 @@ export default function Navigation() {
               }
               onClick={closeMenu}
             >
-              Gallery
+              Artwork
             </NavLink>
             <NavLink
               to="/events"
