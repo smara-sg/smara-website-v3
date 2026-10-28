@@ -117,7 +117,6 @@
     scroll-behavior: smooth;
   }
 
-  /* Force readable contrast on white-text elements so they never vanish on white backgrounds */
   .text-white, 
   h1, h2, h3 {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.4);
