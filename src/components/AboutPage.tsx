@@ -65,12 +65,6 @@ const AboutPage = () => {
       role: "AR Developer & Designer",
       description: "Alvin brings the visual magic to life, creating the beautiful AR filters and animations that transform your meditation experience into an artistic journey.",
       image: "/images/alvinpfp.jpeg"
-    },
-    {
-      name: "Zhi Han",
-      role: "Vibe Coder & Marketer",
-      description: "A digital marketer and vibe coder who helps bring ideas to life. He brings technical and marketing expertise to the team.",
-      image: "/images/hanpfp.jpg"
     }
   ];
 
