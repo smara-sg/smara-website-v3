@@ -24,7 +24,7 @@ const WhatIsSmara = () => {
     <section className="relative">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 z-[-1]"
+        className="absolute inset-0 z-[-2]"
         style={{ 
           backgroundImage: 'url(/images/smara2a.png)',
           backgroundSize: 'cover',
@@ -34,7 +34,9 @@ const WhatIsSmara = () => {
         }}
       >
       </div>
-      {/* Removed dark overlay div */}
+
+      {/* Restored Dark Scrim & Soft Blur Overlay */}
+      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
@@ -54,13 +56,13 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
   />
               </div>
               <div>
-                <h3 className="text-2xl font-light text-white mb-4 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">The Practice</h3>
-                <p className="text-lg text-gray-200 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+                <h3 className="text-2xl font-light text-white mb-4 [text-shadow:0_1px_4px_rgba(0,0,0,0.7)]">The Practice</h3>
+                <p className="text-lg text-gray-100 leading-relaxed [text-shadow:0_1px_4px_rgba(0,0,0,0.7)]">
                 By blending technology with timeless mindfulness, SMARA invites you to sit, breathe, and truly see yourself. Each session is a conversation between your inner world and the moving artwork around you, cultivating calm and clarity in minutes.
                 </p>
               </div>
             </div>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto [text-shadow:0_1px_3px_rgba(0,0,0,0.5)] mt-8">
+          <p className="text-xl text-white/95 max-w-3xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.7)] mt-8">
             A transformative experience that combines art, technology, and mindfulness
           </p>
         </div>
@@ -73,8 +75,8 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
                   {benefit.icon}
                 </div>
               </div>
-              <h3 className="text-xl font-medium text-white mb-4 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{benefit.title}</h3>
-              <p className="text-gray-200 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{benefit.description}</p>
+              <h3 className="text-xl font-medium text-white mb-4 [text-shadow:0_1px_4px_rgba(0,0,0,0.7)]">{benefit.title}</h3>
+              <p className="text-gray-100 leading-relaxed [text-shadow:0_1px_4px_rgba(0,0,0,0.7)]">{benefit.description}</p>
             </div>
           ))}
         </div>
