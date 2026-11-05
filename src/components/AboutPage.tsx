@@ -88,7 +88,7 @@ const AboutPage = () => {
       {/* What is Smara Section */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="glass-emerald rounded-2xl p-8 lg:p-12 hover-lift animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-light text-gray-800 mb-6">What is SMARA?</h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
@@ -122,7 +122,7 @@ ties.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {teamMembers.map((member, index) => (
             <div key={index} className="glass-card rounded-2xl overflow-hidden hover-lift transition-shadow duration-300 animate-fade-in">
               <div className="p-6">
