@@ -52,7 +52,7 @@ const Experience = () => {
     <section className="relative">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 z-[-1]"
+        className="absolute inset-0 z-[-2]"
         style={{ 
           backgroundImage: 'url(/images/smara3a.png)',
           backgroundSize: 'cover',
@@ -62,7 +62,9 @@ const Experience = () => {
         }}
       >
       </div>
-      {/* Removed dark overlay div */}
+
+      {/* Restored Dark Scrim & Soft Blur Overlay */}
+      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
@@ -82,42 +84,4 @@ const Experience = () => {
                 <div className="w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center overflow-hidden">
                   <img 
                     src={filter.qrImage} 
-                    alt={`${filter.name} QR Code`} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="text-xl font-medium text-white mb-3 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.name}</h3>
-              <p className="text-white text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.description}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* How to Practice */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-16">
-          <h3 className="text-2xl md:text-3xl font-light text-white mb-8 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
-            How to Practice SMARA
-          </h3>
-          
-          <div className="space-y-8">
-            {steps.map((step, index) => (
-              <div key={index} className="flex items-start space-x-6">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-medium">
-                    {step.number}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-xl font-medium text-white mb-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.title}</h4>
-                  <p className="text-gray-200 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default Experience;
+                    alt
