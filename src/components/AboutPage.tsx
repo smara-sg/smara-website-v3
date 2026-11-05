@@ -65,6 +65,12 @@ const AboutPage = () => {
       role: "AR Developer & Designer",
       description: "Alvin brings the visual magic to life, creating the beautiful AR filters and animations that transform your meditation experience into an artistic journey.",
       image: "/images/alvinpfp.jpeg"
+    },
+    {
+      name: "Lilian Ong",
+      role: "Workshop Facilitator & Mindfulness Teacher",
+      description: "Lilian brings more than 20 years’ experience as a professional counsellor, integrating mental health education with mindfulness practice to improve individual, community and workplace wellbeing.",
+      image: "/images/lilianpfp.jpeg"
     }
   ];
 
