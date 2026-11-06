@@ -39,7 +39,7 @@ const Testimonials = () => {
     <section className="relative">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 z-[-1]"
+        className="absolute inset-0 z-[-2]"
         style={{ 
           backgroundImage: 'url(/images/smara2a.png)',
           backgroundSize: 'cover',
@@ -49,7 +49,9 @@ const Testimonials = () => {
         }}
       >
       </div>
-      {/* Removed dark overlay div */}
+
+      {/* Restored Dark Scrim & Soft Blur Overlay */}
+      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
       
       <div className="relative z-10 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,7 +74,7 @@ const Testimonials = () => {
                 </blockquote>
                 <div className="text-center">
                   <p className="text-white font-medium [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.author}</p>
-                  <p className="text-gray-200 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.location}</p>
+                  <p className="text-gray-100 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.location}</p>
                 </div>
               </div>
             ))}
@@ -80,7 +82,7 @@ const Testimonials = () => {
           
           {/* Scroll indicator */}
           <div className="text-center mt-6">
-            <p className="text-gray-200 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">← Scroll to read more testimonials →</p>
+            <p className="text-gray-100 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">← Scroll to read more testimonials →</p>
           </div>
         </div>
       </div>
