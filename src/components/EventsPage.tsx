@@ -36,13 +36,13 @@ const EventsPage = () => {
     },
     {
       id: 2,
-      title: "SMARA Test New Event",
-      description: "Test Event.",
+      title: "Watch this space for future events!",
+      description: "Coming Soon",
       images: [
         "/images/cate.gif"
       ],
-      date: "Q10 2050",
-      location: "Mars"
+      date: "Coming Soon",
+      location: "Coming soon"
     },
    
   ];
