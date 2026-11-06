@@ -34,6 +34,16 @@ const EventsPage = () => {
       date: "Q4 2025",
       location: "Various Community Centres, Singapore"
     },
+    {
+      id: 2,
+      title: "SMARA Test New Event",
+      description: "Test Event.",
+      images: [
+        "/images/cate.gif"
+      ],
+      date: "Q10 2050",
+      location: "Mars"
+    },
    
   ];
 
