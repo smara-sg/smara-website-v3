@@ -12,15 +12,19 @@ import GalleryPage from './components/GalleryPage';
 import ArtCardsPage from './components/ArtCardsPage';
 import NotFoundPage from './components/NotFoundPage';
 import PageSeo from './components/PageSeo';
+import Footer from './components/Footer';
 
 function Home() {
   return (
     <>
       <HeroSection />
       <WhatIsSmara />
+      <div className="bg-smara-2 bg-band" aria-hidden="true" />
       <Experience />
+      <div className="bg-smara-3 bg-band" aria-hidden="true" />
       <Testimonials />
       <Community />
+      <Footer />
     </>
   );
 }

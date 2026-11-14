@@ -3,124 +3,55 @@ import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  `text-sm transition-colors duration-200 ${
+    isActive ? 'text-ink' : 'text-mute hover:text-ink'
+  }`;
+
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
-  const navLinkClass = ({ isActive }: { isActive: boolean }) => 
-    `px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-      isActive 
-        ? 'text-blue-600 border-b-2 border-blue-600' 
-        : 'text-gray-700 hover:text-blue-600'
-    }`;
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <NavLink 
-              to="/" 
-              className="flex items-center text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
-              onClick={closeMenu}
-            >
-              <OptimizedImage
-                src="/images/SMARA_icon.png"
-                alt="SMARA Logo"
-                className="h-8 w-auto mr-2"
-                loading="eager"
-              />
-              SMARA
-            </NavLink>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:ml-6 md:flex md:items-center md:space-x-8">
-            <NavLink
-              to="/gallery"
-              className={navLinkClass}
-              onClick={closeMenu}
-            >
-              Artwork
-            </NavLink>
-            <NavLink
-              to="/events"
-              className={navLinkClass}
-              onClick={closeMenu}
-            >
-              Events
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={navLinkClass}
-              onClick={closeMenu}
-            >
-              About
-            </NavLink>
-          </div>
+    <nav className="sticky top-0 z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+        <NavLink
+          to="/"
+          className="flex items-center text-[15px] font-medium tracking-wide text-ink"
+          onClick={closeMenu}
+        >
+          <OptimizedImage
+            src="/images/SMARA_icon.png"
+            alt="SMARA Logo"
+            className="mr-2 h-7 w-auto"
+            loading="eager"
+          />
+          SMARA
+        </NavLink>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
-            >
-              {isMenuOpen ? (
-                <X className="block h-6 w-6" />
-              ) : (
-                <Menu className="block h-6 w-6" />
-              )}
-            </button>
-          </div>
+        <div className="hidden items-center gap-8 md:flex">
+          <NavLink to="/gallery" className={linkClass} onClick={closeMenu}>Artwork</NavLink>
+          <NavLink to="/events" className={linkClass} onClick={closeMenu}>Events</NavLink>
+          <NavLink to="/about" className={linkClass} onClick={closeMenu}>About</NavLink>
         </div>
+
+        <button
+          type="button"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-ink md:hidden"
+          aria-expanded={isMenuOpen}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          onClick={() => setIsMenuOpen((open) => !open)}
+        >
+          {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
-            <NavLink
-              to="/gallery"
-              className={({ isActive }) => 
-                `block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium ${
-                  isActive 
-                    ? 'text-blue-600 border-blue-600' 
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300'
-                }`
-              }
-              onClick={closeMenu}
-            >
-              Artwork
-            </NavLink>
-            <NavLink
-              to="/events"
-              className={({ isActive }) => 
-                `block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium ${
-                  isActive 
-                    ? 'text-blue-600 border-blue-600' 
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300'
-                }`
-              }
-              onClick={closeMenu}
-            >
-              Events
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) => 
-                `block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium ${
-                  isActive 
-                    ? 'text-blue-600 border-blue-600' 
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300'
-                }`
-              }
-              onClick={closeMenu}
-            >
-              About
-            </NavLink>
+        <div className="border-t border-black/5 bg-white/95 px-6 py-4 md:hidden">
+          <div className="flex flex-col gap-1">
+            <NavLink to="/gallery" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Artwork</NavLink>
+            <NavLink to="/events" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Events</NavLink>
+            <NavLink to="/about" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>About</NavLink>
           </div>
         </div>
       )}
