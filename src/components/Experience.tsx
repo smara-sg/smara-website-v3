@@ -50,15 +50,15 @@ const Experience = () => {
   return (
     <section className="section bg-mist">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="display">Your SMARA Experience</h2>
-        <p className="lede mt-8">
+        <h2 className="display on-painting">Your SMARA Experience</h2>
+        <p className="lede on-painting mt-8">
           Experience the future of mindfulness with our AR-powered self-gaze meditation.
         </p>
       </div>
 
       <div className="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-3">
         {filters.map((filter) => (
-          <div key={filter.name} className="rounded-3xl bg-white px-8 py-10 text-center">
+          <div key={filter.name} className="glass rounded-3xl px-8 py-10 text-center">
             <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-2xl bg-mist">
               <OptimizedImage
                 src={filter.qrImage}
@@ -73,10 +73,10 @@ const Experience = () => {
       </div>
 
       <div className="mx-auto mt-24 max-w-3xl">
-        <h3 className="text-center text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+        <h3 className="on-painting text-center text-3xl font-semibold tracking-tight text-ink md:text-4xl">
           How to Practice SMARA
         </h3>
-        <ol className="mt-12 space-y-10">
+        <ol className="glass mt-12 space-y-10 rounded-3xl px-8 py-10">
           {steps.map((step) => (
             <li key={step.number} className="grid grid-cols-[auto_1fr] gap-6">
               <span className="pt-1 text-sm font-medium text-accent">{step.number}</span>

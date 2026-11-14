@@ -12,7 +12,7 @@ const HeroSection = () => {
         <h2 className="mx-auto mt-5 max-w-4xl text-balance text-2xl font-medium tracking-tight text-ink md:text-4xl">
           Self-Gaze Meditation Augmented Reality Art
         </h2>
-        <h3 className="mx-auto mt-6 max-w-xl text-balance text-lg font-normal leading-relaxed text-mute md:text-xl">
+        <h3 className="mx-auto mt-6 max-w-xl text-balance text-lg font-normal leading-relaxed text-[#2c2c2e] md:text-xl">
           Discover inner peace as art, music, and your own reflection guide you inward.
         </h3>
         <Link to="/gallery" className="btn-primary mt-10">

@@ -35,15 +35,15 @@ const Testimonials = () => {
   return (
     <section className="section">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="display">What People Are Saying</h2>
-        <p className="lede mt-8">
+        <h2 className="display on-painting">What People Are Saying</h2>
+        <p className="lede on-painting mt-8">
           Hear from our community of mindfulness practitioners and art lovers
         </p>
       </div>
 
       <div className="mt-16 flex snap-x gap-5 overflow-x-auto px-6 pb-2 md:px-[max(1.5rem,calc((100%-72rem)/2))]">
         {testimonials.map((testimonial) => (
-          <figure key={testimonial.author} className="w-[min(85vw,22rem)] flex-none snap-start rounded-3xl bg-mist p-8">
+          <figure key={testimonial.author} className="glass w-[min(85vw,22rem)] flex-none snap-start rounded-3xl p-8">
             <blockquote className="text-lg leading-relaxed text-ink">
               “{testimonial.quote}”
             </blockquote>
@@ -54,7 +54,7 @@ const Testimonials = () => {
           </figure>
         ))}
       </div>
-      <p className="mt-6 text-center text-sm text-mute">← Scroll to read more testimonials →</p>
+      <p className="on-painting mt-6 text-center text-sm text-ink">← Scroll to read more testimonials →</p>
     </section>
   );
 };
