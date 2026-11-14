@@ -2,9 +2,30 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section className="relative flex min-h-[calc(100svh-3.5rem)] items-center">
-      <div className="absolute inset-0 bg-smara-1" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.82),rgba(255,255,255,0.28)_46%,rgba(255,255,255,0.05)_72%)]" />
+    <section className="relative flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden">
+      <picture className="absolute inset-0 block">
+        <source
+          media="(max-width: 767px)"
+          srcSet="/images/hero-mountains-mobile.webp"
+          type="image/webp"
+        />
+        <source
+          media="(max-width: 767px)"
+          srcSet="/images/hero-mountains-mobile.jpg"
+          type="image/jpeg"
+        />
+        <source srcSet="/images/hero-mountains.webp" type="image/webp" />
+        <img
+          src="/images/hero-mountains.jpg"
+          alt=""
+          width={1280}
+          height={720}
+          className="h-full w-full object-cover object-center"
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.38),rgba(255,255,255,0.1)_42%,transparent_70%)]" />
 
       <div className="rise relative mx-auto max-w-3xl px-6 py-24 text-center">
         <h1 className="text-6xl font-semibold tracking-tight text-ink md:text-8xl">

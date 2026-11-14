@@ -63,19 +63,26 @@ export default function PageSeo() {
     if (head.noindex) upsertMeta('name', 'robots', 'noindex')
     else removeMeta('name', 'robots')
 
-    const preload = document.head.querySelector<HTMLLinkElement>('link[data-hero-preload]')
+    const existing = document.head.querySelectorAll('link[data-hero-preload]')
     if (head.preloadHero) {
-      if (!preload) {
-        const link = document.createElement('link')
-        link.rel = 'preload'
-        link.as = 'image'
-        link.type = 'image/webp'
-        link.href = '/images/smara1a.webp'
-        link.setAttribute('data-hero-preload', '')
-        document.head.appendChild(link)
+      if (existing.length === 0) {
+        const specs = [
+          ['/images/hero-mountains.webp', '(min-width: 768px)'],
+          ['/images/hero-mountains-mobile.webp', '(max-width: 767px)'],
+        ] as const
+        for (const [href, media] of specs) {
+          const link = document.createElement('link')
+          link.rel = 'preload'
+          link.as = 'image'
+          link.type = 'image/webp'
+          link.href = href
+          link.media = media
+          link.setAttribute('data-hero-preload', '')
+          document.head.appendChild(link)
+        }
       }
     } else {
-      preload?.remove()
+      existing.forEach((link) => link.remove())
     }
   }, [pathname])
 

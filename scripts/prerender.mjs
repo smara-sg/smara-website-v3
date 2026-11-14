@@ -68,7 +68,8 @@ function seoBlock(head) {
   )
   if (head.preloadHero) {
     lines.push(
-      '<link rel="preload" as="image" href="/images/smara1a.webp" type="image/webp" data-hero-preload="" />'
+      '<link rel="preload" as="image" href="/images/hero-mountains.webp" type="image/webp" media="(min-width: 768px)" data-hero-preload="" />',
+      '<link rel="preload" as="image" href="/images/hero-mountains-mobile.webp" type="image/webp" media="(max-width: 767px)" data-hero-preload="" />'
     )
   }
   return lines.map((line) => `    ${line}`).join('\n')
