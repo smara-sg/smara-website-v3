@@ -65,7 +65,8 @@ export function pageHead(pathname: string): PageHead {
   return {
     title: page.title,
     description: page.description,
-    canonical: `${SITE_URL}${path === '/' ? '/' : path}`,
+    // Netlify serves directory indexes at a trailing slash (/gallery → 301 /gallery/).
+    canonical: `${SITE_URL}${path === '/' ? '/' : `${path}/`}`,
     noindex: false,
     preloadHero: path === '/',
     image: OG_IMAGE,
