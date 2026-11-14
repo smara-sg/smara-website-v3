@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
+
+type EventImage = { src: string; width?: number; height?: number }
 
 const EventsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({
@@ -9,15 +12,22 @@ const EventsPage = () => {
     2: 0
   });
 
-  const events = [
+  const events: Array<{
+    id: number
+    title: string
+    description: string
+    images: EventImage[]
+    date: string
+    location: string
+  }> = [
     {
       id: 0,
       title: "SMARA @ SAMH",
       description: "A two-day event featuring various mindfulness activities for the neighbourhood elderly. Participants were invited to experience self-gaze meditation sessions, alongside other activities planned by SAMH.",
       images: [
-                "/images/samh1.jpg",
-        "/images/samh2.jpg",
-        "/images/samh3.jpg"
+        { src: "/images/samh1.jpg" },
+        { src: "/images/samh2.jpg" },
+        { src: "/images/samh3.jpg" }
       ],
       date: "June 20–21, 2025",
       location: "SAMH, Mental Wellness for All"
@@ -27,9 +37,9 @@ const EventsPage = () => {
       title: "SMARA In The Heartlands",
       description: "Spot us at various SMARA calming spaces around Singapore, and discover the SMARA experience by scanning the QR on our stickers. An invitation to join us in this SMARA movement.",
       images: [
-        "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3822621/pexels-photo-3822621.jpeg?auto=compress&cs=tinysrgb&w=800"
+        { src: "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 1200 },
+        { src: "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 533 },
+        { src: "https://images.pexels.com/photos/3822621/pexels-photo-3822621.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 1200 }
       ],
       date: "Q4 2025",
       location: "Various Community Centres, Singapore"
@@ -39,7 +49,7 @@ const EventsPage = () => {
       title: "Watch this space for future events!",
       description: "Coming Soon",
       images: [
-        "/images/cate.gif"
+        { src: "/images/cate.gif" }
       ],
       date: "Coming Soon",
       location: "Coming soon"
@@ -85,10 +95,12 @@ const EventsPage = () => {
               <div className="grid grid-cols-1 gap-0">
                 {/* Image Carousel */}
                 <div className="relative h-80 lg:h-96">
-                  <img
-                    src={event.images[currentImageIndex[event.id]]}
+                  <OptimizedImage
+                    src={event.images[currentImageIndex[event.id]].src}
                     alt={`${event.title} - Image ${currentImageIndex[event.id] + 1}`}
-                    className="w-full h-full object-cover"
+                    width={event.images[currentImageIndex[event.id]].width}
+                    height={event.images[currentImageIndex[event.id]].height}
+                    fill
                   />
                   
                   {/* Carousel Controls */}

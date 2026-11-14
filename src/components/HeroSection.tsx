@@ -1,20 +1,8 @@
-import React from 'react';
-
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara1a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+      <div className="absolute inset-0 z-[-2] bg-smara-1" />
 
       {/* Restored Dark Scrim & Soft Blur Overlay */}
       <div className="absolute inset-0 z-[-1] bg-slate-950/45 backdrop-blur-[2px]" />

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { ScrollToTop } from './utils/scrollToTop';
 import Navigation from './components/Navigation';
 import HeroSection from './components/HeroSection';
@@ -10,6 +10,8 @@ import EventsPage from './components/EventsPage';
 import AboutPage from './components/AboutPage';
 import GalleryPage from './components/GalleryPage';
 import ArtCardsPage from './components/ArtCardsPage';
+import NotFoundPage from './components/NotFoundPage';
+import PageSeo from './components/PageSeo';
 
 function Home() {
   return (
@@ -25,20 +27,19 @@ function Home() {
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Navigation />
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/art-cards" element={<ArtCardsPage />} />
-          <Route path="*" element={<Home />} /> {/* Fallback to home */}
-        </Routes>
-      </div>
-    </Router>
+    <div className="min-h-screen">
+      <PageSeo />
+      <Navigation />
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/art-cards" element={<ArtCardsPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </div>
   );
 }
 

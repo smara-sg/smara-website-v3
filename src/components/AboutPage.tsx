@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Heart, Mail } from 'lucide-react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
 
 const AboutPage = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +47,7 @@ const AboutPage = () => {
       } else {
         setSubmitStatus('error');
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -126,11 +127,12 @@ ties.
           {teamMembers.map((member, index) => (
             <div key={index} className="glass-card rounded-2xl overflow-hidden hover-lift transition-shadow duration-300 animate-fade-in">
               <div className="p-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4">
-                  <img
+                <div className="relative w-24 h-24 rounded-full overflow-hidden mx-auto mb-4">
+                  <OptimizedImage
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="text-center">

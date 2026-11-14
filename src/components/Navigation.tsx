@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,10 +27,11 @@ export default function Navigation() {
               className="flex items-center text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
               onClick={closeMenu}
             >
-              <img 
-                src="/images/SMARA_icon.png" 
-                alt="SMARA Logo" 
-                className="h-8 w-auto mr-2" 
+              <OptimizedImage
+                src="/images/SMARA_icon.png"
+                alt="SMARA Logo"
+                className="h-8 w-auto mr-2"
+                loading="eager"
               />
               SMARA
             </NavLink>
