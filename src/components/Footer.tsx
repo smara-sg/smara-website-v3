@@ -99,7 +99,7 @@ const Footer = () => {
               Self-gaze Meditation AR Art or SMARA is not a substitute for professional medical or psychological 
               advice, nor is it intended to cure, treat or diagnose medical conditions. Individual results may vary, 
               and users are responsible for their own well-being. By using any of the products of SMARA, you 
-              agree to the disclaimer. The owners and creators of SMARA is not liable for any damages or injuries 
+              agree to the disclaimer. The owners and creators of SMARA are not liable for any damages or injuries 
               incurred or caused from use of any of its products.
             </p>
           </div>
@@ -107,8 +107,8 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 SMARA. All rights reserved.
+          <p className="text-gray-400 text-sm" suppressHydrationWarning>
+            © {new Date().getFullYear()} SMARA. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm mt-2 md:mt-0">
             Mindful technology for inner peace

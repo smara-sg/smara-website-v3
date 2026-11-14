@@ -1,6 +1,7 @@
-import { ArrowRight, ChevronDown, ChevronUp, Instagram, Music } from 'lucide-react';
+import { ChevronDown, ChevronUp, Instagram, Music } from 'lucide-react';
 import { useState } from 'react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
 
 interface Artist {
   name: string;
@@ -76,25 +77,25 @@ const ArtCardsPage = () => {
     {
       title: "Cosmic Harmony",
       description: "Explore the vastness of space and find peace in the celestial dance of stars and galaxies.",
-      image: "/images/cosmic-card.png",
+      image: "/images/cosmic-card.jpg",
       artist: "Sarah Lim"
     },
     {
       title: "Ocean Depths",
       description: "Dive into the tranquil underwater world and experience the calming rhythm of ocean waves.",
-      image: "/images/ocean-card.png",
+      image: "/images/ocean-card.jpg",
       artist: "Michael Tan"
     },
     {
       title: "Mountain Peaks",
       description: "Find stillness in the majesty of towering mountains and crisp alpine air.",
-      image: "/images/mountain-card.png",
+      image: "/images/mountain-card.jpg",
       artist: "Jessica Wong"
     },
     {
       title: "Urban Zen",
       description: "Discover moments of peace in the heart of the city's vibrant energy.",
-      image: "/images/urban-card.png",
+      image: "/images/urban-card.jpg",
       artist: "David Chen"
     }
   ];
@@ -181,10 +182,11 @@ const ArtCardsPage = () => {
                 {/* Front of Card */}
                 <div className="absolute inset-0 transition-transform duration-500 transform-style-preserve-3d group">
                   <div className="absolute inset-0 rounded-2xl shadow-xl overflow-hidden backface-hidden">
-                    <img 
-                      src={card.image} 
+                    <OptimizedImage
+                      src={card.image}
                       alt={card.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      loading={index === 0 ? 'eager' : 'lazy'}
                     />
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black/70 to-transparent">
                       <div className="bg-black/60 inline-block px-3 py-1 rounded-full text-sm mb-2">
@@ -266,9 +268,12 @@ const ArtCardsPage = () => {
                   </li>
                 ))}
               </ol>
-              <button className="mt-8 w-full bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
+              <a
+                href={`mailto:hello@smara.online?subject=${encodeURIComponent('SMARA Creator Program application')}`}
+                className="mt-8 w-full bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 block text-center"
+              >
                 Apply Now
-              </button>
+              </a>
             </div>
           </div>
         </div>

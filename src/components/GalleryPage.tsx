@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Mail } from 'lucide-react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
 
 const GalleryPage = () => {
   const [currentArtworkIndex, setCurrentArtworkIndex] = useState(0);
@@ -11,31 +12,31 @@ const GalleryPage = () => {
       id: 1,
       title: "Enchanted Lavender",
       description: "A dreamy forest bathed in soft light, where lavender blooms line the edges of a winding path. The air feels alive with growth and quiet abundance, each flower standing as a symbol of renewal and harmony within nature's embrace.",
-      image: "/images/enchanted_lavendar.jpg"
+      image: "/images/enchanted_lavender.jpg"
     },
     {
       id: 2,
       title: "Clear Blue",
       description: "A tranquil scene of a beach hut poised above crystalline waters, with endless blue skies melting seamlessly into the sea. It is a vision of pure escape, where serenity and clarity stretch as far as the horizon.",
-      image: "/images/clear_blue.png"
+      image: "/images/clear_blue.jpg"
     },
     {
       id: 3,
       title: "Godray",
       description: "Light breaks through drifting clouds and descends upon a vast valley, illuminating the land with a celestial glow. The scene evokes a quiet reverence, as if nature itself were touched by something divine.",
-      image: "/images/godray_valley.png"
+      image: "/images/godray_valley.jpg"
     },
     {
       id: 4,
       title: "Midnight Pond",
       description: "Under the glow of a full moon, a pond shimmers with an otherworldly luminescence. Silhouettes of fish glide beneath the surface, while lotus blossoms float gracefully—an ethereal balance of stillness and life beneath the midnight sky.",
-      image: "/images/midnight_pond.png"
+      image: "/images/midnight_pond.jpg"
     },
     {
       id: 5,
       title: "Serene Seclusion",
       description: "In the heart of a flowering forest rests a solitary bench, nestled beneath a canopy of pink blooms. Petals scatter across the ground like whispers of time, creating a sanctuary of gentle solitude and unspoken beauty.",
-      image: "/images/serene_seclusion.png"
+      image: "/images/serene_seclusion.jpg"
     }
   ];
 
@@ -89,10 +90,11 @@ const GalleryPage = () => {
                     currentCarouselIndex + 1 === num ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
-                  <img 
+                  <OptimizedImage
                     src={`/images/smarainplaces${num}.jpg`}
                     alt={`SMARA in place ${num}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    loading={currentCarouselIndex + 1 === num ? 'eager' : 'lazy'}
                   />
                 </div>
               ))}
@@ -145,10 +147,10 @@ const GalleryPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Image Section */}
             <div className="relative h-96 lg:h-[600px]">
-              <img
+              <OptimizedImage
                 src={currentArtwork.image}
                 alt={currentArtwork.title}
-                className="w-full h-full object-cover"
+                fill
               />
               
               {/* Carousel Controls */}
@@ -203,12 +205,13 @@ const GalleryPage = () => {
 
       {/* Contact Button - Outside Container and Centered */}
       <div className="text-center mt-12 mb-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          className="gradient-emerald hover-lift text-white px-8 py-4 rounded-full font-medium transition-all duration-200 flex items-center justify-center space-x-2 mx-auto"
+        <a
+          href={`mailto:hello@smara.online?subject=${encodeURIComponent(`Artwork enquiry: ${currentArtwork.title}`)}`}
+          className="gradient-emerald hover-lift text-white px-8 py-4 rounded-full font-medium transition-all duration-200 inline-flex items-center justify-center space-x-2 mx-auto"
         >
           <Mail size={20} />
           <span>Contact to Buy Artwork</span>
-        </button>
+        </a>
       </div>
 
       <Footer />

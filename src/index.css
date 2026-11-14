@@ -192,11 +192,32 @@ video {
 }
 
 /* Full-bleed background sections */
-.full-bleed-bg {
+.full-bleed-bg,
+.bg-smara-1,
+.bg-smara-2,
+.bg-smara-3 {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+.bg-smara-1 {
+  background-image: url("/images/smara1a.jpg");
+  background-image: -webkit-image-set(url("/images/smara1a.webp") type("image/webp"), url("/images/smara1a.jpg") type("image/jpeg"));
+  background-image: image-set(url("/images/smara1a.webp") type("image/webp"), url("/images/smara1a.jpg") type("image/jpeg"));
+}
+
+.bg-smara-2 {
+  background-image: url("/images/smara2a.jpg");
+  background-image: -webkit-image-set(url("/images/smara2a.webp") type("image/webp"), url("/images/smara2a.jpg") type("image/jpeg"));
+  background-image: image-set(url("/images/smara2a.webp") type("image/webp"), url("/images/smara2a.jpg") type("image/jpeg"));
+}
+
+.bg-smara-3 {
+  background-image: url("/images/smara3a.jpg");
+  background-image: -webkit-image-set(url("/images/smara3a.webp") type("image/webp"), url("/images/smara3a.jpg") type("image/jpeg"));
+  background-image: image-set(url("/images/smara3a.webp") type("image/webp"), url("/images/smara3a.jpg") type("image/jpeg"));
 }
 
 /* Backdrop blur effects for glass morphism */

@@ -1,5 +1,5 @@
-import React from 'react';
 import { Heart, Focus, Leaf } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const WhatIsSmara = () => {
   const benefits = [
@@ -23,17 +23,7 @@ const WhatIsSmara = () => {
   return (
     <section className="relative">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara2a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+      <div className="absolute inset-0 z-[-2] bg-smara-2" />
 
       {/* Restored Dark Scrim & Soft Blur Overlay */}
       <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
@@ -49,11 +39,12 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
           </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-12">
-              <div className="glass-card aspect-[4/3] rounded-lg overflow-hidden hover-lift">
-                <img src="/images/smara4.png"
-    alt="Self-gaze meditation practice"
-    className="w-full h-full object-cover"
-  />
+              <div className="glass-card aspect-[4/3] rounded-lg overflow-hidden hover-lift relative">
+                <OptimizedImage
+                  src="/images/smara4.jpg"
+                  alt="Self-gaze meditation practice"
+                  fill
+                />
               </div>
               <div>
                 <h3 className="text-2xl font-light text-white mb-4 [text-shadow:0_1px_4px_rgba(0,0,0,0.7)]">The Practice</h3>

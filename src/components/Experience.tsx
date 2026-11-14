@@ -1,5 +1,4 @@
-import React from 'react';
-import { QrCode } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const Experience = () => {
   const filters = [
@@ -51,17 +50,7 @@ const Experience = () => {
   return (
     <section className="relative">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara3a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+      <div className="absolute inset-0 z-[-2] bg-smara-3" />
 
       {/* Restored Dark Scrim & Soft Blur Overlay */}
       <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
@@ -81,11 +70,11 @@ const Experience = () => {
           {filters.map((filter, index) => (
             <div key={index} className="glass-card rounded-2xl p-8 hover-lift animate-fade-in">
               <div className="flex justify-center mb-6">
-                <div className="w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={filter.qrImage} 
-                    alt={`${filter.name} QR Code`} 
-                    className="w-full h-full object-cover"
+                <div className="relative w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center overflow-hidden">
+                  <OptimizedImage
+                    src={filter.qrImage}
+                    alt={`${filter.name} QR Code`}
+                    fill
                   />
                 </div>
               </div>

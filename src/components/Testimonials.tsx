@@ -1,4 +1,3 @@
-import React from 'react';
 import { Quote } from 'lucide-react';
 
 const Testimonials = () => {
@@ -38,17 +37,7 @@ const Testimonials = () => {
   return (
     <section className="relative">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara2a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+      <div className="absolute inset-0 z-[-2] bg-smara-2" />
 
       {/* Restored Dark Scrim & Soft Blur Overlay */}
       <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
