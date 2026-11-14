@@ -74,6 +74,39 @@
   min-height: 68vh;
 }
 
+.day-night {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.day-night__layer {
+  position: absolute;
+  inset: 0;
+}
+
+.day-night__fade {
+  opacity: 0;
+}
+
+.over-landscape {
+  position: relative;
+  z-index: 1;
+}
+
+.over-landscape .section,
+.over-landscape footer {
+  background-color: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.over-landscape .section.bg-mist {
+  background-color: rgba(245, 245, 247, 0.78);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
