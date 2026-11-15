@@ -27,7 +27,7 @@ const MeditationPractice = () => {
   };
 
   return (
-    <div className="relative z-10 -ml-4 min-w-0 flex-1">
+    <div className="absolute inset-y-0 -right-3 left-[calc(50%+2.5rem)] z-10">
       <style>{`
         @keyframes meditation-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgb(37 97 121 / 16%); }
@@ -50,27 +50,28 @@ const MeditationPractice = () => {
           setHasError(true);
         }}
       />
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5 text-left">
+      <div className="text-left">
         <button
           type="button"
           aria-label={playing ? 'Pause meditation practice' : 'Play meditation practice with Lilian Ong'}
           aria-describedby={playing ? undefined : 'lilian-practice-invitation'}
           onClick={togglePlayback}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-white ring-2 ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-safe:animate-[meditation-pulse_4s_ease-in-out_infinite]"
+          className="absolute bottom-0 left-0 grid h-11 w-11 place-items-center rounded-full bg-accent text-white ring-2 ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-safe:animate-[meditation-pulse_4s_ease-in-out_infinite]"
         >
           {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
         </button>
         {!playing && (
           <p
             id="lilian-practice-invitation"
-            className="relative origin-left rounded-2xl bg-mist px-3 py-2 text-xs leading-relaxed text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
+            className="absolute bottom-12 left-4 right-0 max-w-[9rem] origin-bottom-left rounded-xl bg-mist px-2 py-1.5 text-[11px] leading-snug text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
           >
-            <span aria-hidden="true" className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 bg-mist" />
-            Try a 3-minute soothing audio practice here. Close your eyes for best effect!
+            <span aria-hidden="true" className="absolute -bottom-1 left-2 h-2 w-2 rotate-45 bg-mist" />
+            {hasError ? (
+              <span role="status">Audio couldn’t play. Tap play to try again.</span>
+            ) : 'Try a 3-minute soothing audio practice here. Close your eyes for best effect!'}
           </p>
         )}
       </div>
-      {hasError && <p role="status" className="mt-2 text-sm text-mute">Audio couldn’t play. Tap play to try again.</p>}
     </div>
   );
 };
@@ -190,8 +191,8 @@ ties.
           {teamMembers.map((member) => (
             <div key={member.name} className="rounded-3xl bg-white px-6 py-10 text-center">
               <div>
-                <div className={member.name === 'Lilian Ong' ? 'mb-5 flex min-h-28 items-end' : 'mb-5'}>
-                  <div className={`relative h-28 w-28 shrink-0 overflow-hidden rounded-full bg-mist ${member.name === 'Lilian Ong' ? '' : 'mx-auto'}`}>
+                <div className="relative mb-5">
+                  <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full bg-mist">
                     <OptimizedImage
                       src={member.image}
                       alt={member.name}
