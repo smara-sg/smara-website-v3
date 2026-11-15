@@ -1,7 +1,79 @@
-import { useState } from 'react';
-import { Heart, Mail } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Heart, Mail, Pause, Play } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
+
+const MeditationPractice = () => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    setHasError(false);
+    if (audio.error) audio.load();
+    try {
+      await audio.play();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        setHasError(true);
+      }
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      <style>{`
+        @keyframes meditation-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgb(37 97 121 / 16%); }
+          50% { box-shadow: 0 0 0 6px rgb(37 97 121 / 4%); }
+        }
+        @keyframes meditation-bubble-in {
+          from { opacity: 0; transform: translateX(-4px) scale(.97); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
+      <audio
+        ref={audioRef}
+        src="/lilian-meditation-practice.mp3"
+        preload="none"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        onError={() => {
+          setPlaying(false);
+          setHasError(true);
+        }}
+      />
+      <div className="grid min-h-[5rem] grid-cols-[auto_1fr] items-center gap-3 text-left">
+        <button
+          type="button"
+          aria-label={playing ? 'Pause meditation practice' : 'Play meditation practice with Lilian Ong'}
+          aria-describedby={playing ? undefined : 'lilian-practice-invitation'}
+          onClick={togglePlayback}
+          className={`grid h-11 w-11 place-items-center rounded-full bg-accent text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${playing ? '' : 'motion-safe:animate-[meditation-pulse_4s_ease-in-out_infinite]'}`}
+        >
+          {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+        </button>
+        {!playing && (
+          <p
+            id="lilian-practice-invitation"
+            className="relative origin-left rounded-2xl bg-mist px-3 py-2 text-xs leading-relaxed text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
+          >
+            <span aria-hidden="true" className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 bg-mist" />
+            try a 3-minute audio practice here. Close your eyes for best effect!
+          </p>
+        )}
+      </div>
+      {hasError && <p role="status" className="mt-2 text-sm text-mute">Audio couldn’t play. Tap play to try again.</p>}
+    </div>
+  );
+};
 
 const AboutPage = () => {
   const [formData, setFormData] = useState({
@@ -130,6 +202,7 @@ ties.
                   <h3 className="text-lg font-medium text-ink">{member.name}</h3>
                   <p className="mt-1 text-sm text-accent">{member.role}</p>
                   <p className="mt-4 text-sm leading-relaxed text-mute">{member.description}</p>
+                  {member.name === 'Lilian Ong' && <MeditationPractice />}
                 </div>
               </div>
             </div>
