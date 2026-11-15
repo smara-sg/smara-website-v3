@@ -164,7 +164,7 @@ const ArtCardsPage = () => {
       {/* Hero Section */}
       <section className="bg-white px-6 pb-8 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-6xl">
-          <h1 className="display mx-auto max-w-4xl">
+          <h1 className="display heading-glow mx-auto max-w-4xl">
             Transform Art into Interactive Meditation
           </h1>
           <p className="lede mx-auto mt-8 max-w-2xl">
