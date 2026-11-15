@@ -33,7 +33,7 @@ function Home() {
 
 const arSamples = [
   { name: 'Moonlit Lotus Pond', image: '/images/ar-moonlit-lotus-pond.jpg' },
-  { name: 'Misty Mountain', image: '/images/ar-misty-mountain.jpg' },
+  { name: 'Misty Mountain', image: '/images/ar-misty-mountain-v2.jpg' },
   { name: 'Tropical Beach', image: '/images/ar-tropical-beach.jpg' },
 ];
 
@@ -44,7 +44,7 @@ function ArExperiencePage() {
         <h1 className="display">Augment Reality (AR) Experience</h1>
         <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-2 sm:gap-6">
           {arSamples.map(({ name, image }) => (
-            <li key={name} className="min-w-0">
+            <li key={name} className="relative min-w-0">
               <img
                 src={image}
                 alt={name}
@@ -52,6 +52,16 @@ function ArExperiencePage() {
                 height={1920}
                 className="block h-auto w-full rounded-2xl sm:rounded-3xl"
               />
+              <div className="absolute inset-0 grid place-items-center p-1.5 sm:p-3">
+                <button
+                  type="button"
+                  disabled
+                  aria-label={`click me to experience ${name} (coming soon)`}
+                  className="min-h-11 max-w-full rounded-full bg-white/90 px-2 py-1.5 text-[11px] font-medium leading-tight text-ink shadow-sm sm:px-4 sm:text-sm"
+                >
+                  click me to experience
+                </button>
+              </div>
             </li>
           ))}
         </ul>
