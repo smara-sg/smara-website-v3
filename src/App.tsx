@@ -57,7 +57,7 @@ function ArExperiencePage() {
                   type="button"
                   disabled
                   aria-label={`click me to experience ${name} (coming soon)`}
-                  className="min-h-11 max-w-full rounded-full bg-white/90 px-2 py-1.5 text-[11px] font-medium leading-tight text-ink shadow-sm sm:px-4 sm:text-sm"
+                  className="min-h-11 max-w-full px-2 py-1.5 text-[11px] font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-sm"
                 >
                   click me to experience
                 </button>
