@@ -72,26 +72,20 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mt-12 mb-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          </div>
-          <h1 className="text-4xl md:text-5xl font-light text-gray-800 text-center">
-            SMARA Events
-          </h1>
-          <p className="text-lg text-gray-600 text-center mt-4 max-w-2xl mx-auto">
-            Join our community for workshops, retreats, and gatherings focused on self-gaze meditation and mindful living.
-          </p>
-        </div>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-3xl px-6 pb-4 pt-24 text-center md:pt-32">
+        <h1 className="display">
+          SMARA Events
+        </h1>
+        <p className="lede mt-8">
+          Join our community for workshops, retreats, and gatherings focused on self-gaze meditation and mindful living.
+        </p>
       </div>
 
-      {/* Events Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <div key={event.id} className="glass-card rounded-2xl overflow-hidden hover-lift transition-shadow duration-300 animate-fade-in">
+            <div key={event.id} className="overflow-hidden rounded-3xl bg-mist">
               <div className="grid grid-cols-1 gap-0">
                 {/* Image Carousel */}
                 <div className="relative h-80 lg:h-96">
@@ -106,16 +100,18 @@ const EventsPage = () => {
                   {/* Carousel Controls */}
                   <button
                     onClick={() => prevImage(event.id, event.images.length)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+                    className="icon-btn left-3"
+                    aria-label={`Previous image for ${event.title}`}
                   >
-                    <ChevronLeft size={20} className="text-gray-700" />
+                    <ChevronLeft size={18} />
                   </button>
-                  
+
                   <button
                     onClick={() => nextImage(event.id, event.images.length)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+                    className="icon-btn right-3"
+                    aria-label={`Next image for ${event.title}`}
                   >
-                    <ChevronRight size={20} className="text-gray-700" />
+                    <ChevronRight size={18} />
                   </button>
 
                   {/* Image Indicators */}
@@ -133,22 +129,22 @@ const EventsPage = () => {
                 </div>
 
                 {/* Event Content */}
-                <div className="p-6 flex flex-col justify-center">
-                  <h2 className="text-2xl md:text-3xl font-light text-gray-800 mb-4">
+                <div className="flex flex-col justify-center p-7">
+                  <h2 className="text-2xl font-semibold tracking-tight text-ink">
                     {event.title}
                   </h2>
-                  
-                  <p className="text-gray-600 leading-relaxed mb-6">
+
+                  <p className="mt-3 leading-relaxed text-mute">
                     {event.description}
                   </p>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center text-gray-500">
-                      <Calendar size={18} className="mr-3" />
+                  <div className="mt-6 space-y-2 text-sm text-mute">
+                    <div className="flex items-center">
+                      <Calendar size={16} className="mr-3" />
                       <span>{event.date}</span>
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <MapPin size={18} className="mr-3" />
+                    <div className="flex items-center">
+                      <MapPin size={16} className="mr-3" />
                       <span>{event.location}</span>
                     </div>
                   </div>

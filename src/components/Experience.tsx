@@ -2,18 +2,18 @@ import OptimizedImage from './OptimizedImage';
 
 const Experience = () => {
   const filters = [
-    { 
-      name: "Night Sky", 
+    {
+      name: "Night Sky",
       description: "A gentle, calming night sky.",
       qrImage: "/images/nightsky-qr.png"
     },
-    { 
-      name: "Door To Beach", 
+    {
+      name: "Door To Beach",
       description: "Doorway to a serene paradise.",
       qrImage: "/images/doortobeach-qr.png"
     },
-    { 
-      name: "Flowers", 
+    {
+      name: "Flowers",
       description: "Whimsical blooms within and around you.",
       qrImage: "/images/flowers-qr.png"
     }
@@ -26,13 +26,13 @@ const Experience = () => {
       description: "Find a quiet, comfortable place. Sit upright, open the SMARA AR filter on your device."
     },
     {
-      number: "2", 
+      number: "2",
       title: "Prepare to Gaze",
       description: "Ensure you can see yourself in the filter and hear the music. Close your eyes and begin deep breaths."
     },
     {
       number: "3",
-      title: "Calm Your Breath", 
+      title: "Calm Your Breath",
       description: "Breathe in through your nose and exhale slowly through your mouth, making the exhale as long as possible. Continue for 1-2 minutes until you feel calm and your heart rate slows."
     },
     {
@@ -48,64 +48,45 @@ const Experience = () => {
   ];
 
   return (
-    <section className="relative">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-[-2] bg-smara-3" />
+    <section className="section bg-mist">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="display">Your SMARA Experience</h2>
+        <p className="lede mt-8">
+          Experience the future of mindfulness with our AR-powered self-gaze meditation.
+        </p>
+      </div>
 
-      {/* Restored Dark Scrim & Soft Blur Overlay */}
-      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
-            Your SMARA Experience
-          </h2>
-          <p className="text-lg text-white max-w-3xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
-            Experience the future of mindfulness with our AR-powered self-gaze meditation.
-          </p>
-        </div>
-
-        {/* AR Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {filters.map((filter, index) => (
-            <div key={index} className="glass-card rounded-2xl p-8 hover-lift animate-fade-in">
-              <div className="flex justify-center mb-6">
-                <div className="relative w-32 h-32 gradient-ocean rounded-xl flex items-center justify-center overflow-hidden">
-                  <OptimizedImage
-                    src={filter.qrImage}
-                    alt={`${filter.name} QR Code`}
-                    fill
-                  />
-                </div>
-              </div>
-              <h3 className="text-xl font-medium text-white mb-3 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.name}</h3>
-              <p className="text-white text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{filter.description}</p>
+      <div className="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-3">
+        {filters.map((filter) => (
+          <div key={filter.name} className="rounded-3xl bg-white px-8 py-10 text-center">
+            <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-2xl bg-mist">
+              <OptimizedImage
+                src={filter.qrImage}
+                alt={`${filter.name} QR Code`}
+                fill
+              />
             </div>
-          ))}
-        </div>
-
-        {/* How to Practice */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-16">
-          <h3 className="text-2xl md:text-3xl font-light text-white mb-8 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
-            How to Practice SMARA
-          </h3>
-          
-          <div className="space-y-8">
-            {steps.map((step, index) => (
-              <div key={index} className="flex items-start space-x-6">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-medium">
-                    {step.number}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-xl font-medium text-white mb-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.title}</h4>
-                  <p className="text-gray-100 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{step.description}</p>
-                </div>
-              </div>
-            ))}
+            <h3 className="mt-6 text-xl font-medium text-ink">{filter.name}</h3>
+            <p className="mt-2 text-mute">{filter.description}</p>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="mx-auto mt-24 max-w-3xl">
+        <h3 className="text-center text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+          How to Practice SMARA
+        </h3>
+        <ol className="mt-12 space-y-10">
+          {steps.map((step) => (
+            <li key={step.number} className="grid grid-cols-[auto_1fr] gap-6">
+              <span className="pt-1 text-sm font-medium text-accent">{step.number}</span>
+              <div>
+                <h4 className="text-xl font-medium text-ink">{step.title}</h4>
+                <p className="mt-2 leading-relaxed text-mute">{step.description}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
