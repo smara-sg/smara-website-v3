@@ -43,8 +43,14 @@
     @apply w-full rounded-2xl border border-transparent bg-mist px-4 py-3 text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-accent/30;
   }
 
-  /* Barely-there warm halo so large titles lift off a light sky. */
+  /* Soft champagne lift for titles on white. Warm-white is only for type over the painting. */
   .heading-glow {
+    text-shadow:
+      0 0 28px rgba(201, 170, 120, 0.18),
+      0 0 2px rgba(201, 170, 120, 0.12);
+  }
+
+  .heading-glow-sky {
     text-shadow:
       0 0 24px rgba(255, 252, 247, 0.5),
       0 0 2px rgba(255, 252, 247, 0.3);
