@@ -28,7 +28,7 @@ const HeroSection = () => {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.38),rgba(255,255,255,0.1)_42%,transparent_70%)]" />
 
       <div className="rise relative mx-auto max-w-3xl px-6 py-24 text-center">
-        <h1 className="heading-glow-sky text-6xl font-semibold tracking-tight text-ink md:text-8xl">
+        <h1 className="heading-glow text-6xl font-semibold tracking-tight text-ink md:text-8xl">
           SMARA
         </h1>
         <h2 className="heading-glow-soft mx-auto mt-5 max-w-4xl text-balance text-2xl font-medium tracking-tight text-ink md:text-4xl">

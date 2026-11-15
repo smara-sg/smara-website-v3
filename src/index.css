@@ -43,23 +43,18 @@
     @apply w-full rounded-2xl border border-transparent bg-mist px-4 py-3 text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-accent/30;
   }
 
-  /* Soft champagne lift for titles on white. Warm-white is only for type over the painting. */
+  /* Soft champagne halo for main titles, including the hero over the watercolour sky. */
   .heading-glow {
     text-shadow:
-      0 0 28px rgba(201, 170, 120, 0.18),
-      0 0 2px rgba(201, 170, 120, 0.12);
-  }
-
-  .heading-glow-sky {
-    text-shadow:
-      0 0 24px rgba(255, 252, 247, 0.5),
-      0 0 2px rgba(255, 252, 247, 0.3);
+      0 0 12px rgba(176, 140, 80, 0.35),
+      0 0 32px rgba(176, 140, 80, 0.25),
+      0 0 60px rgba(176, 140, 80, 0.15);
   }
 
   .heading-glow-soft {
     text-shadow:
-      0 0 18px rgba(255, 252, 247, 0.28),
-      0 0 1px rgba(255, 252, 247, 0.16);
+      0 0 10px rgba(176, 140, 80, 0.2),
+      0 0 28px rgba(176, 140, 80, 0.12);
   }
 }
 
