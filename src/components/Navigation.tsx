@@ -32,6 +32,7 @@ export default function Navigation() {
         <div className="hidden items-center gap-8 md:flex">
           <NavLink to="/gallery" className={linkClass} onClick={closeMenu}>Artwork</NavLink>
           <NavLink to="/events" className={linkClass} onClick={closeMenu}>Events</NavLink>
+          <NavLink to="/ar-experience" className={linkClass} onClick={closeMenu}>Augment Reality (AR) Experience</NavLink>
           <NavLink to="/about" className={linkClass} onClick={closeMenu}>About</NavLink>
         </div>
 
@@ -51,6 +52,7 @@ export default function Navigation() {
           <div className="flex flex-col gap-1">
             <NavLink to="/gallery" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Artwork</NavLink>
             <NavLink to="/events" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Events</NavLink>
+            <NavLink to="/ar-experience" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Augment Reality (AR) Experience</NavLink>
             <NavLink to="/about" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>About</NavLink>
           </div>
         </div>
