@@ -6,7 +6,7 @@ export default function NotFoundPage() {
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-xl px-6 py-32 text-center">
         <p className="text-sm font-medium tracking-wide text-accent">404</p>
-        <h1 className="heading-glow mt-4 text-5xl font-semibold tracking-tight text-ink md:text-6xl">Page not found</h1>
+        <h1 className="mt-4 text-5xl font-semibold tracking-tight text-ink md:text-6xl">Page not found</h1>
         <p className="lede mt-6">
           That address doesn&apos;t match a page on this site.
         </p>

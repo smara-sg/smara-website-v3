@@ -74,7 +74,7 @@ const EventsPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-3xl px-6 pb-4 pt-24 text-center md:pt-32">
-        <h1 className="display heading-glow">
+        <h1 className="display">
           SMARA Events
         </h1>
         <p className="lede mt-8">

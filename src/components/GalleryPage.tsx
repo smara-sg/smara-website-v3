@@ -65,7 +65,7 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-3xl px-6 pb-8 pt-24 text-center md:pt-32">
-        <h1 className="display heading-glow">
+        <h1 className="display">
           SMARA Artworks For Sale
         </h1>
         <p className="lede mt-8">
