@@ -58,6 +58,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
 
   useEffect(() => {
     const modal = dialog.current;
+    const { scrollX, scrollY } = window;
     modal?.showModal();
     open.current = true;
     const previousOverflow = document.body.style.overflow;
@@ -66,6 +67,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       open.current = false;
       modal?.close();
       document.body.style.overflow = previousOverflow;
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: 'instant' });
       const activeRecorder = recorder.current;
       if (activeRecorder) {
         activeRecorder.onstop = null;
