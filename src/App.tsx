@@ -72,6 +72,13 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
   const pondVideo = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const stream = useRef<MediaStream | null>(null);
+  const microphone = useRef<MediaStream | null>(null);
+  const audio = useRef<{
+    context: AudioContext;
+    output: MediaStreamAudioDestinationNode;
+    monitor: GainNode;
+    microphoneSource?: MediaStreamAudioSourceNode;
+  } | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const downloadUrl = useRef('');
   const open = useRef(false);
@@ -104,6 +111,8 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
         activeRecorder.stream.getTracks().forEach((track) => track.stop());
       }
       stream.current?.getTracks().forEach((track) => track.stop());
+      microphone.current?.getTracks().forEach((track) => track.stop());
+      void audio.current?.context.close().catch(() => {});
       URL.revokeObjectURL(downloadUrl.current);
     };
   }, []);
@@ -155,6 +164,8 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       if (recorder.current?.state === 'recording') recorder.current.stop();
       stream.current?.getTracks().forEach((track) => track.stop());
       stream.current = null;
+      microphone.current?.getTracks().forEach((track) => track.stop());
+      microphone.current = null;
       if (feed) feed.srcObject = null;
       setReady(false);
       setPermission('ask');
@@ -253,21 +264,56 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     };
   }, [permission, facing, switching, image]);
 
-  async function connectCamera(direction: 'user' | 'environment', exact = false) {
+  function startPondAudio() {
+    const video = pondVideo.current;
+    if (!video) throw new Error('Pond video unavailable');
+    if (!audio.current) {
+      const context = new AudioContext();
+      const output = context.createMediaStreamDestination();
+      const soundtrack = context.createMediaElementSource(video);
+      const monitor = context.createGain();
+      const recordedMusic = context.createGain();
+      monitor.gain.value = 0;
+      recordedMusic.gain.value = 0.35;
+      soundtrack.connect(monitor).connect(context.destination);
+      soundtrack.connect(recordedMusic).connect(output);
+      audio.current = { context, output, monitor };
+    }
+    // Unlock audible video and Web Audio in the permission button gesture.
+    void audio.current.context.resume().catch(() => {});
+    video.muted = false;
+    void video.play().catch(() => {});
+  }
+
+  async function connectCamera(
+    direction: 'user' | 'environment',
+    exact = false,
+    includeMicrophone = false,
+  ) {
     const feed = camera.current;
     if (!feed) return;
     const media = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: exact ? { exact: direction } : { ideal: direction } },
-      audio: false,
+      audio: includeMicrophone ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : false,
     });
     if (!open.current) {
       media.getTracks().forEach((track) => track.stop());
       return;
     }
-    stream.current = media;
-    feed.srcObject = media;
+    const cameraStream = new MediaStream(media.getVideoTracks());
+    stream.current = cameraStream;
+    feed.srcObject = cameraStream;
     try {
       await feed.play();
+      const mix = audio.current;
+      if (open.current && includeMicrophone && mix) {
+        const mic = new MediaStream(media.getAudioTracks());
+        const source = mix.context.createMediaStreamSource(mic);
+        mix.microphoneSource?.disconnect();
+        source.connect(mix.output);
+        mix.microphoneSource = source;
+        microphone.current = mic;
+      }
     } catch (error) {
       media.getTracks().forEach((track) => track.stop());
       stream.current = null;
@@ -282,13 +328,14 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     setMessage('');
     setPermission('loading');
     try {
-      await connectCamera('user');
+      startPondAudio();
+      await connectCamera('user', false, true);
     } catch (error) {
       if (!open.current) return;
       setPermission('ask');
       setMessage(error instanceof DOMException && error.name === 'NotAllowedError'
-        ? 'Camera access was denied. Allow it in your browser settings to try again.'
-        : 'The camera couldn’t start. Check that your browser can access a camera and try again.');
+        ? 'Camera or microphone access was denied. Allow both in your browser settings to try again.'
+        : 'The camera or microphone couldn’t start. Check both devices and try again.');
     }
   }
 
@@ -309,6 +356,8 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
         if (open.current) setMessage('The other camera is unavailable.');
       } catch {
         if (!open.current) return;
+        microphone.current?.getTracks().forEach((track) => track.stop());
+        microphone.current = null;
         setPermission('ask');
         setMessage('The camera couldn’t reconnect. Please try again.');
       }
@@ -365,8 +414,15 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     }
     let capture: MediaStream | undefined;
     try {
-      const mimeType = ['video/mp4', 'video/webm;codecs=vp8', 'video/webm'].find((type) => MediaRecorder.isTypeSupported(type));
+      const mimeType = ['video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm'].find((type) => MediaRecorder.isTypeSupported(type));
+      const mix = audio.current;
+      if (!mix || !microphone.current?.getAudioTracks().some((track) => track.readyState === 'live')) {
+        setMessage('Microphone access is needed to record video with sound.');
+        return;
+      }
+      void mix.context.resume().catch(() => {});
       capture = output.captureStream(30);
+      for (const track of mix.output.stream.getAudioTracks()) capture.addTrack(track.clone());
       const active = new MediaRecorder(capture, mimeType ? { mimeType } : undefined);
       const chunks: Blob[] = [];
       active.ondataavailable = ({ data }) => { if (data.size) chunks.push(data); };
@@ -397,6 +453,11 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
   }
 
   const reviewingVideo = saved && !saved.filename.endsWith('.jpg') ? saved : null;
+  useEffect(() => {
+    const monitor = audio.current?.monitor;
+    if (monitor) monitor.gain.value = permission === 'allowed' && !reviewingVideo ? 1 : 0;
+  }, [permission, reviewingVideo]);
+
   const elapsed = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
 
   return (
@@ -430,7 +491,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
         {permission !== 'allowed' && (
           <div className="absolute inset-0 grid place-items-center bg-black/35 p-4 text-center">
             <div className="max-w-xs rounded-2xl bg-black/80 p-4">
-              <p>this function requires your permission to use the camera: yes or no</p>
+              <p>This experience needs access to your camera and microphone. Allow access?</p>
               <div className="mt-4 flex justify-center gap-3">
                 <button type="button" disabled={permission === 'loading'} onClick={startCamera} className="rounded-full bg-white px-4 py-2 text-black disabled:opacity-50">Yes</button>
                 <button type="button" onClick={onClose} className="rounded-full border border-white/60 px-4 py-2">No</button>
