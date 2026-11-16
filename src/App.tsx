@@ -39,6 +39,8 @@ const arSamples = [
   { name: 'Tropical Beach', image: '/images/ar-tropical-beach.jpg' },
 ];
 
+const maxRecordingSeconds = 60;
+
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
 function PondExperience({ onClose }: { onClose: () => void }) {
@@ -84,10 +86,18 @@ function PondExperience({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (!recording) return;
+    const elapsedMs = () => performance.now() - recordingStarted.current;
     const timer = window.setInterval(() => {
-      setSeconds(Math.floor((performance.now() - recordingStarted.current) / 1000));
+      setSeconds(Math.min(maxRecordingSeconds, Math.floor(elapsedMs() / 1000)));
     }, 200);
-    return () => window.clearInterval(timer);
+    const limit = window.setTimeout(() => {
+      const active = recorder.current;
+      if (active?.state === 'recording') active.stop();
+    }, Math.max(0, maxRecordingSeconds * 1000 - elapsedMs()));
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(limit);
+    };
   }, [recording]);
 
   useEffect(() => {
