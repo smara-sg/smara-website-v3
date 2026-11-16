@@ -43,7 +43,30 @@ const maxRecordingSeconds = 60;
 
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
-function PondExperience({ onClose }: { onClose: () => void }) {
+const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21';
+const personModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
+
+type PersonSegmenter = {
+  segmentForVideo(
+    frame: HTMLVideoElement,
+    timestamp: number,
+    callback: (result: { confidenceMasks?: { width: number; height: number; getAsFloat32Array(): Float32Array }[] }) => void,
+  ): void;
+  close(): void;
+};
+
+async function loadPersonSegmenter(): Promise<PersonSegmenter> {
+  const { FilesetResolver, ImageSegmenter } = await import(/* @vite-ignore */ `${visionAssets}/vision_bundle.mjs`);
+  const files = await FilesetResolver.forVisionTasks(`${visionAssets}/wasm`);
+  return ImageSegmenter.createFromOptions(files, {
+    baseOptions: { modelAssetPath: personModel, delegate: 'CPU' },
+    runningMode: 'VIDEO',
+    outputConfidenceMasks: true,
+    outputCategoryMask: false,
+  });
+}
+
+function PondExperience({ image, onClose }: { image: string; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -107,29 +130,111 @@ function PondExperience({ onClose }: { onClose: () => void }) {
     const ctx = output?.getContext('2d');
     if (!ctx || !output || !feed) return;
 
+    const foreground = document.createElement('canvas');
+    foreground.width = output.width;
+    foreground.height = output.height;
+    const fg = foreground.getContext('2d');
+    const mask = document.createElement('canvas');
+    const maskContext = mask.getContext('2d');
+    if (!fg || !maskContext) return;
+
+    const background = new Image();
+    background.src = image;
+    let active = true;
+    let segmenter: PersonSegmenter | undefined;
+    let timer: number | undefined;
+    let maskPixels: ImageData | undefined;
+    let lastFrameTime = -1;
     let firstFrame = true;
-    const draw = () => {
-      if (feed.readyState < 2 || !feed.videoWidth) return;
+
+    function handleFailure() {
+      if (!active) return;
+      window.clearInterval(timer);
+      if (recorder.current?.state === 'recording') recorder.current.stop();
+      stream.current?.getTracks().forEach((track) => track.stop());
+      stream.current = null;
+      if (feed) feed.srcObject = null;
+      setReady(false);
+      setPermission('ask');
+      setMessage('Background removal couldn’t start. Please try again.');
+    }
+
+    function draw() {
+      if (!segmenter || !feed || !output || !ctx || !fg || !maskContext) return;
+      if (feed.readyState < 2 || !feed.videoWidth || feed.currentTime === lastFrameTime) return;
+      lastFrameTime = feed.currentTime;
       const { width, height } = output;
       const scale = Math.max(width / feed.videoWidth, height / feed.videoHeight);
       const cropWidth = width / scale;
       const cropHeight = height / scale;
-      ctx.save();
-      if (facing === 'user') {
-        ctx.translate(width, 0);
-        ctx.scale(-1, 1);
+      const cropX = (feed.videoWidth - cropWidth) / 2;
+      const cropY = (feed.videoHeight - cropHeight) / 2;
+      try {
+        segmenter.segmentForVideo(feed, performance.now(), ({ confidenceMasks }) => {
+          // Class zero is background. Its inverse keeps all person classes in the frame.
+          const backgroundMask = confidenceMasks?.[0];
+          if (!backgroundMask) throw new Error('Person mask unavailable');
+          if (!maskPixels || maskPixels.width !== backgroundMask.width || maskPixels.height !== backgroundMask.height) {
+            mask.width = backgroundMask.width;
+            mask.height = backgroundMask.height;
+            maskPixels = maskContext.createImageData(mask.width, mask.height);
+          }
+          const confidence = backgroundMask.getAsFloat32Array();
+          for (let pixel = 0; pixel < confidence.length; pixel++) {
+            const person = Math.max(0, Math.min(1, (0.85 - confidence[pixel]) / 0.7));
+            maskPixels.data[pixel * 4 + 3] = person * 255;
+          }
+          maskContext.putImageData(maskPixels, 0, 0);
+
+          fg.clearRect(0, 0, width, height);
+          fg.save();
+          if (facing === 'user') {
+            fg.translate(width, 0);
+            fg.scale(-1, 1);
+          }
+          fg.drawImage(feed, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
+          fg.globalCompositeOperation = 'destination-in';
+          const maskScaleX = mask.width / feed.videoWidth;
+          const maskScaleY = mask.height / feed.videoHeight;
+          fg.drawImage(mask, cropX * maskScaleX, cropY * maskScaleY, cropWidth * maskScaleX, cropHeight * maskScaleY, 0, 0, width, height);
+          fg.restore();
+
+          ctx.drawImage(background, 0, 0, width, height);
+          ctx.drawImage(foreground, 0, 0);
+          if (firstFrame) {
+            firstFrame = false;
+            setReady(true);
+          }
+        });
+      } catch {
+        handleFailure();
       }
-      ctx.drawImage(feed, (feed.videoWidth - cropWidth) / 2, (feed.videoHeight - cropHeight) / 2, cropWidth, cropHeight, 0, 0, width, height);
-      ctx.restore();
-      if (firstFrame) {
-        firstFrame = false;
-        setReady(true);
+    }
+
+    async function startSegmentation() {
+      try {
+        await background.decode();
+        if (!active) return;
+        const model = await loadPersonSegmenter();
+        if (!active) {
+          model.close();
+          return;
+        }
+        segmenter = model;
+        timer = window.setInterval(draw, 1000 / 15);
+        draw();
+      } catch {
+        handleFailure();
       }
+    }
+
+    void startSegmentation();
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      segmenter?.close();
     };
-    draw();
-    const timer = globalThis.setInterval(draw, 1000 / 30);
-    return () => globalThis.clearInterval(timer);
-  }, [permission, facing, switching]);
+  }, [permission, facing, switching, image]);
 
   async function connectCamera(direction: 'user' | 'environment', exact = false) {
     const feed = camera.current;
@@ -328,7 +433,7 @@ function PondExperience({ onClose }: { onClose: () => void }) {
                 </>
               )}
             </div>
-            {!ready && <p role="status" className="mt-2 text-xs">{switching ? 'Switching camera…' : 'Starting the camera…'}</p>}
+            {!ready && <p role="status" className="mt-2 text-xs">{switching ? 'Switching camera…' : 'Preparing background removal…'}</p>}
             {message && <p role="status" className="mt-2 text-xs">{message}</p>}
             {saved && !reviewingVideo && <a href={saved.url} download={saved.filename} className="mt-2 inline-block text-xs underline">Download last photo</a>}
           </div>
@@ -370,7 +475,7 @@ function ArExperiencePage() {
             </li>
           ))}
         </ul>
-        {pondOpen && <PondExperience onClose={() => setPondOpen(false)} />}
+        {pondOpen && <PondExperience image={pond.image} onClose={() => setPondOpen(false)} />}
       </main>
       <Footer />
     </div>
