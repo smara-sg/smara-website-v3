@@ -69,6 +69,7 @@ async function loadPersonSegmenter(): Promise<PersonSegmenter> {
 function PondExperience({ image, onClose }: { image: string; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
+  const pondVideo = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -145,6 +146,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     let timer: number | undefined;
     let maskPixels: ImageData | undefined;
     let lastFrameTime = -1;
+    let lastSegmentationTime = -Infinity;
     let firstFrame = true;
 
     function handleFailure() {
@@ -161,54 +163,69 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
 
     function draw() {
       if (!segmenter || !feed || !output || !ctx || !fg || !maskContext) return;
-      if (feed.readyState < 2 || !feed.videoWidth || feed.currentTime === lastFrameTime) return;
-      lastFrameTime = feed.currentTime;
-      const { width, height } = output;
-      const scale = Math.max(width / feed.videoWidth, height / feed.videoHeight);
-      const cropWidth = width / scale;
-      const cropHeight = height / scale;
-      const cropX = (feed.videoWidth - cropWidth) / 2;
-      const cropY = (feed.videoHeight - cropHeight) / 2;
-      try {
-        segmenter.segmentForVideo(feed, performance.now(), ({ confidenceMasks }) => {
-          // Class zero is background. Its inverse keeps all person classes in the frame.
-          const backgroundMask = confidenceMasks?.[0];
-          if (!backgroundMask) throw new Error('Person mask unavailable');
-          if (!maskPixels || maskPixels.width !== backgroundMask.width || maskPixels.height !== backgroundMask.height) {
-            mask.width = backgroundMask.width;
-            mask.height = backgroundMask.height;
-            maskPixels = maskContext.createImageData(mask.width, mask.height);
-          }
-          const confidence = backgroundMask.getAsFloat32Array();
-          for (let pixel = 0; pixel < confidence.length; pixel++) {
-            const person = Math.max(0, Math.min(1, (0.85 - confidence[pixel]) / 0.7));
-            maskPixels.data[pixel * 4 + 3] = person * 255;
-          }
-          maskContext.putImageData(maskPixels, 0, 0);
-
-          fg.clearRect(0, 0, width, height);
-          fg.save();
-          if (facing === 'user') {
-            fg.translate(width, 0);
-            fg.scale(-1, 1);
-          }
-          fg.drawImage(feed, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
-          fg.globalCompositeOperation = 'destination-in';
-          const maskScaleX = mask.width / feed.videoWidth;
-          const maskScaleY = mask.height / feed.videoHeight;
-          fg.drawImage(mask, cropX * maskScaleX, cropY * maskScaleY, cropWidth * maskScaleX, cropHeight * maskScaleY, 0, 0, width, height);
-          fg.restore();
-
-          ctx.drawImage(background, 0, 0, width, height);
-          ctx.drawImage(foreground, 0, 0);
-          if (firstFrame) {
-            firstFrame = false;
-            setReady(true);
-          }
-        });
-      } catch {
-        handleFailure();
+      const now = performance.now();
+      if (feed.readyState >= 2 && feed.videoWidth && feed.currentTime !== lastFrameTime && now - lastSegmentationTime >= 60) {
+        lastFrameTime = feed.currentTime;
+        lastSegmentationTime = now;
+        const { width, height } = output;
+        const scale = Math.max(width / feed.videoWidth, height / feed.videoHeight);
+        const cropWidth = width / scale;
+        const cropHeight = height / scale;
+        const cropX = (feed.videoWidth - cropWidth) / 2;
+        const cropY = (feed.videoHeight - cropHeight) / 2;
+        try {
+          segmenter.segmentForVideo(feed, now, ({ confidenceMasks }) => {
+            // Class zero is background. Its inverse keeps all person classes in the frame.
+            const backgroundMask = confidenceMasks?.[0];
+            if (!backgroundMask) throw new Error('Person mask unavailable');
+            if (!maskPixels || maskPixels.width !== backgroundMask.width || maskPixels.height !== backgroundMask.height) {
+              mask.width = backgroundMask.width;
+              mask.height = backgroundMask.height;
+              maskPixels = maskContext.createImageData(mask.width, mask.height);
+            }
+            const confidence = backgroundMask.getAsFloat32Array();
+            for (let pixel = 0; pixel < confidence.length; pixel++) {
+              const person = Math.max(0, Math.min(1, (0.85 - confidence[pixel]) / 0.7));
+              maskPixels.data[pixel * 4 + 3] = person * 255;
+            }
+            maskContext.putImageData(maskPixels, 0, 0);
+  
+            fg.clearRect(0, 0, width, height);
+            fg.save();
+            if (facing === 'user') {
+              fg.translate(width, 0);
+              fg.scale(-1, 1);
+            }
+            fg.drawImage(feed, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
+            fg.globalCompositeOperation = 'destination-in';
+            const maskScaleX = mask.width / feed.videoWidth;
+            const maskScaleY = mask.height / feed.videoHeight;
+            fg.drawImage(mask, cropX * maskScaleX, cropY * maskScaleY, cropWidth * maskScaleX, cropHeight * maskScaleY, 0, 0, width, height);
+            fg.restore();
+  
+            if (firstFrame) {
+              firstFrame = false;
+              setReady(true);
+            }
+          });
+        } catch {
+          handleFailure();
+          return;
+        }
       }
+
+      if (firstFrame) return;
+      const video = pondVideo.current;
+      if (video && video.readyState >= 2 && video.videoWidth && video.videoHeight) {
+        const scale = Math.max(output.width / video.videoWidth, output.height / video.videoHeight);
+        const cropWidth = output.width / scale;
+        const cropHeight = output.height / scale;
+        ctx.drawImage(video, (video.videoWidth - cropWidth) / 2, (video.videoHeight - cropHeight) / 2,
+          cropWidth, cropHeight, 0, 0, output.width, output.height);
+      } else {
+        ctx.drawImage(background, 0, 0, output.width, output.height);
+      }
+      ctx.drawImage(foreground, 0, 0);
     }
 
     async function startSegmentation() {
@@ -221,7 +238,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
           return;
         }
         segmenter = model;
-        timer = window.setInterval(draw, 1000 / 15);
+        timer = window.setInterval(draw, 1000 / 30);
         draw();
       } catch {
         handleFailure();
@@ -391,10 +408,21 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       style={{ width: 'min(calc(100vw - 2rem), calc(56.25dvh - 1.125rem), 1080px)' }}
     >
       <div className="relative aspect-[9/16]">
+        <video
+          ref={pondVideo}
+          src="/images/ar-moonlit-lotus-pond-loop.mp4"
+          poster={image}
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <video ref={camera} muted playsInline className="sr-only" aria-hidden="true" />
         <canvas ref={canvas} width={1080} height={1920} className={`absolute inset-0 h-full w-full ${ready ? '' : 'invisible'}`} aria-hidden="true" />
         {reviewingVideo && (
-          <video src={reviewingVideo.url} controls playsInline aria-label="Recorded video preview" className="absolute inset-0 h-full w-full bg-black object-contain pb-16" />
+          <video src={reviewingVideo.url} controls loop playsInline aria-label="Recorded video preview" className="absolute inset-0 h-full w-full bg-black object-contain pb-16" />
         )}
         <button type="button" aria-label="Close experience" onClick={onClose} className={captureButtonClass + ' absolute right-2 top-2 z-10'}>
           <X size={20} aria-hidden="true" />
