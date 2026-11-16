@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Square, Video, X } from 'lucide-react';
+import { Camera, Download, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
 import { Routes, Route } from 'react-router-dom';
 import { ScrollToTop } from './utils/scrollToTop';
 import Navigation from './components/Navigation';
@@ -41,15 +41,18 @@ const arSamples = [
 
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
-function PondExperience({ image, onClose }: { image: string; onClose: () => void }) {
+function PondExperience({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const backdrop = useRef<HTMLImageElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const downloadUrl = useRef('');
   const open = useRef(false);
+  const recordingStarted = useRef(0);
+  const [seconds, setSeconds] = useState(0);
+  const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [switching, setSwitching] = useState(false);
   const [permission, setPermission] = useState<'ask' | 'loading' | 'allowed'>('ask');
   const [ready, setReady] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -80,28 +83,33 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
   }, []);
 
   useEffect(() => {
-    if (permission !== 'allowed') return;
+    if (!recording) return;
+    const timer = window.setInterval(() => {
+      setSeconds(Math.floor((performance.now() - recordingStarted.current) / 1000));
+    }, 200);
+    return () => window.clearInterval(timer);
+  }, [recording]);
+
+  useEffect(() => {
+    if (permission !== 'allowed' || switching) return;
     const output = canvas.current;
     const feed = camera.current;
-    const scene = backdrop.current;
     const ctx = output?.getContext('2d');
-    if (!ctx || !output || !feed || !scene) return;
+    if (!ctx || !output || !feed) return;
 
     let firstFrame = true;
     const draw = () => {
-      if (!scene.naturalWidth || feed.readyState < 2 || !feed.videoWidth) return;
-      ctx.drawImage(scene, 0, 0, output.width, output.height);
-      const x = 150, y = 440, width = 780, height = 920;
+      if (feed.readyState < 2 || !feed.videoWidth) return;
+      const { width, height } = output;
       const scale = Math.max(width / feed.videoWidth, height / feed.videoHeight);
-      const cropWidth = width / scale, cropHeight = height / scale;
+      const cropWidth = width / scale;
+      const cropHeight = height / scale;
       ctx.save();
-      ctx.beginPath();
-      if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, width, height, 90);
-      else ctx.rect(x, y, width, height);
-      ctx.clip();
-      ctx.translate(output.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(feed, (feed.videoWidth - cropWidth) / 2, (feed.videoHeight - cropHeight) / 2, cropWidth, cropHeight, x, y, width, height);
+      if (facing === 'user') {
+        ctx.translate(width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(feed, (feed.videoWidth - cropWidth) / 2, (feed.videoHeight - cropHeight) / 2, cropWidth, cropHeight, 0, 0, width, height);
       ctx.restore();
       if (firstFrame) {
         firstFrame = false;
@@ -111,26 +119,39 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     draw();
     const timer = globalThis.setInterval(draw, 1000 / 30);
     return () => globalThis.clearInterval(timer);
-  }, [permission]);
+  }, [permission, facing, switching]);
 
-  async function startCamera() {
+  async function connectCamera(direction: 'user' | 'environment', exact = false) {
     const feed = camera.current;
     if (!feed) return;
+    const media = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: exact ? { exact: direction } : { ideal: direction } },
+      audio: false,
+    });
+    if (!open.current) {
+      media.getTracks().forEach((track) => track.stop());
+      return;
+    }
+    stream.current = media;
+    feed.srcObject = media;
+    try {
+      await feed.play();
+    } catch (error) {
+      media.getTracks().forEach((track) => track.stop());
+      stream.current = null;
+      throw error;
+    }
+    if (!open.current) return;
+    setFacing(media.getVideoTracks()[0]?.getSettings().facingMode === 'environment' ? 'environment' : direction);
+    setPermission('allowed');
+  }
+
+  async function startCamera() {
     setMessage('');
     setPermission('loading');
     try {
-      const media = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'user' } }, audio: false });
-      if (!open.current) {
-        media.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      stream.current = media;
-      feed.srcObject = media;
-      await feed.play();
-      if (open.current) setPermission('allowed');
+      await connectCamera('user');
     } catch (error) {
-      stream.current?.getTracks().forEach((track) => track.stop());
-      stream.current = null;
       if (!open.current) return;
       setPermission('ask');
       setMessage(error instanceof DOMException && error.name === 'NotAllowedError'
@@ -139,7 +160,38 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     }
   }
 
-  function saveCapture(blob: Blob, extension: string) {
+  async function switchCamera() {
+    if (switching || recorder.current) return;
+    setSwitching(true);
+    setReady(false);
+    setMessage('');
+    stream.current?.getTracks().forEach((track) => track.stop());
+    stream.current = null;
+    if (camera.current) camera.current.srcObject = null;
+    try {
+      await connectCamera(facing === 'user' ? 'environment' : 'user', true);
+    } catch {
+      if (!open.current) return;
+      try {
+        await connectCamera(facing);
+        if (open.current) setMessage('The other camera is unavailable.');
+      } catch {
+        if (!open.current) return;
+        setPermission('ask');
+        setMessage('The camera couldn’t reconnect. Please try again.');
+      }
+    } finally {
+      if (open.current) setSwitching(false);
+    }
+  }
+
+  function discardCapture() {
+    URL.revokeObjectURL(downloadUrl.current);
+    downloadUrl.current = '';
+    setSaved(null);
+  }
+
+  function saveCapture(blob: Blob, extension: string, autoDownload = false) {
     if (!open.current) return;
     if (!blob.size) {
       setMessage('The capture was empty. Please try again.');
@@ -150,6 +202,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     const filename = 'smara-lotus-pond-' + Date.now() + '.' + extension;
     downloadUrl.current = url;
     setSaved({ url, filename });
+    if (!autoDownload) return;
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
@@ -161,7 +214,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
   function takePhoto() {
     setMessage('');
     canvas.current?.toBlob((photo) => {
-      if (photo) saveCapture(photo, 'jpg');
+      if (photo) saveCapture(photo, 'jpg', true);
       else if (open.current) setMessage('The photo couldn’t be saved. Please try again.');
     }, 'image/jpeg', 0.92);
   }
@@ -201,6 +254,8 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
         saveCapture(new Blob(chunks, { type }), type.startsWith('video/mp4') ? 'mp4' : 'webm');
       };
       active.start(1000);
+      recordingStarted.current = performance.now();
+      setSeconds(0);
       recorder.current = active;
       setRecording(true);
     } catch {
@@ -208,6 +263,9 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       setMessage('Video recording couldn’t start. You can still take photos.');
     }
   }
+
+  const reviewingVideo = saved && !saved.filename.endsWith('.jpg') ? saved : null;
+  const elapsed = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
 
   return (
     <dialog
@@ -218,9 +276,12 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       style={{ width: 'min(calc(100vw - 2rem), calc(56.25dvh - 1.125rem), 1080px)' }}
     >
       <div className="relative aspect-[9/16]">
-        <img ref={backdrop} src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <video ref={camera} muted playsInline className="sr-only" aria-hidden="true" />
-        <canvas ref={canvas} width={1080} height={1920} className="absolute inset-0 h-full w-full" aria-hidden="true" />
+        <canvas ref={canvas} width={1080} height={1920} className={`absolute inset-0 h-full w-full ${ready ? '' : 'invisible'}`} aria-hidden="true" />
+        {reviewingVideo && (
+          <video src={reviewingVideo.url} controls playsInline aria-label="Recorded video preview" className="absolute inset-0 h-full w-full bg-black object-contain pb-16" />
+        )}
+        {recording && <p role="timer" aria-label="Recording time" className="absolute left-3 top-3 rounded-full bg-black/65 px-3 py-1 text-sm tabular-nums">{elapsed}</p>}
         <button type="button" aria-label="Close experience" onClick={onClose} className={captureButtonClass + ' absolute right-2 top-2 z-10'}>
           <X size={20} aria-hidden="true" />
         </button>
@@ -239,16 +300,27 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
         )}
         {permission === 'allowed' && (
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-center">
-            <div className="flex justify-center gap-4">
-              <button type="button" disabled={!ready} aria-label="Take JPEG photo" onClick={takePhoto} className={captureButtonClass}><Camera size={20} aria-hidden="true" /></button>
-              <button type="button" disabled={!ready} aria-label={recording ? 'Stop and save video' : 'Record video'} aria-pressed={recording} onClick={toggleRecording} className={captureButtonClass}>
-                {recording ? <Square size={18} aria-hidden="true" /> : <Video size={20} aria-hidden="true" />}
-              </button>
+            <div className="relative flex justify-center gap-3">
+              {reviewingVideo ? (
+                <>
+                  <a href={reviewingVideo.url} download={reviewingVideo.filename} aria-label="Save video" className={captureButtonClass}><Download size={20} aria-hidden="true" /></a>
+                  <button type="button" aria-label="Start over" onClick={discardCapture} className={captureButtonClass}><RotateCcw size={20} aria-hidden="true" /></button>
+                </>
+              ) : (
+                <>
+                  <button type="button" disabled={!ready || switching} aria-label="Take JPEG photo" onClick={takePhoto} className={captureButtonClass}><Camera size={20} aria-hidden="true" /></button>
+                  <button type="button" disabled={!ready || switching} aria-label={recording ? 'Stop recording' : 'Record video'} aria-pressed={recording} onClick={toggleRecording} className={captureButtonClass}>
+                    {recording ? <Square size={18} aria-hidden="true" /> : <Video size={20} aria-hidden="true" />}
+                  </button>
+                  <button type="button" disabled={!ready || recording || switching} aria-label="Switch camera" onClick={switchCamera} className={captureButtonClass + ' absolute bottom-0 right-0 hidden [@media(pointer:coarse)]:grid'}>
+                    <SwitchCamera size={20} aria-hidden="true" />
+                  </button>
+                </>
+              )}
             </div>
-            {!ready && <p role="status" className="mt-2 text-xs">Starting the camera…</p>}
-            {recording && <p role="status" className="mt-2 text-xs">Recording</p>}
+            {!ready && <p role="status" className="mt-2 text-xs">{switching ? 'Switching camera…' : 'Starting the camera…'}</p>}
             {message && <p role="status" className="mt-2 text-xs">{message}</p>}
-            {saved && <a href={saved.url} download={saved.filename} className="mt-2 inline-block text-xs underline">Download last capture</a>}
+            {saved && !reviewingVideo && <a href={saved.url} download={saved.filename} className="mt-2 inline-block text-xs underline">Download last photo</a>}
           </div>
         )}
       </div>
@@ -288,7 +360,7 @@ function ArExperiencePage() {
             </li>
           ))}
         </ul>
-        {pondOpen && <PondExperience image={pond.image} onClose={() => setPondOpen(false)} />}
+        {pondOpen && <PondExperience onClose={() => setPondOpen(false)} />}
       </main>
       <Footer />
     </div>
