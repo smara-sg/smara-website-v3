@@ -291,7 +291,6 @@ function PondExperience({ onClose }: { onClose: () => void }) {
         {reviewingVideo && (
           <video src={reviewingVideo.url} controls playsInline aria-label="Recorded video preview" className="absolute inset-0 h-full w-full bg-black object-contain pb-16" />
         )}
-        {recording && <p role="timer" aria-label="Recording time" className="absolute left-3 top-3 rounded-full bg-black/65 px-3 py-1 text-sm tabular-nums">{elapsed}</p>}
         <button type="button" aria-label="Close experience" onClick={onClose} className={captureButtonClass + ' absolute right-2 top-2 z-10'}>
           <X size={20} aria-hidden="true" />
         </button>
@@ -310,6 +309,7 @@ function PondExperience({ onClose }: { onClose: () => void }) {
         )}
         {permission === 'allowed' && (
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-center">
+            {recording && <p role="timer" aria-label="Recording time" className="mx-auto mb-2 w-fit rounded-full bg-black/65 px-3 py-1 text-sm tabular-nums">{elapsed}</p>}
             <div className="relative flex justify-center gap-3">
               {reviewingVideo ? (
                 <>
