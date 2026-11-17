@@ -34,10 +34,12 @@ function Home() {
 }
 
 const arSamples = [
-  { name: 'Moonlit Lotus Pond', image: '/images/ar-moonlit-lotus-pond.jpg' },
-  { name: 'Misty Mountain', image: '/images/ar-misty-mountain-v2.jpg' },
-  { name: 'Tropical Beach', image: '/images/ar-tropical-beach.jpg' },
+  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-loop.mp4' },
+  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-loop.mp4' },
+  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-loop.mp4' },
 ];
+
+type ArSample = (typeof arSamples)[number];
 
 const maxRecordingSeconds = 60;
 
@@ -66,10 +68,11 @@ async function loadPersonSegmenter(): Promise<PersonSegmenter> {
   });
 }
 
-function PondExperience({ image, onClose }: { image: string; onClose: () => void }) {
+function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () => void }) {
+  const { name, slug, image, video } = sample;
   const dialog = useRef<HTMLDialogElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
-  const pondVideo = useRef<HTMLVideoElement>(null);
+  const backdropVideo = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const microphone = useRef<MediaStream | null>(null);
@@ -226,7 +229,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
       }
 
       if (firstFrame) return;
-      const video = pondVideo.current;
+      const video = backdropVideo.current;
       if (video && video.readyState >= 2 && video.videoWidth && video.videoHeight) {
         const scale = Math.max(output.width / video.videoWidth, output.height / video.videoHeight);
         const cropWidth = output.width / scale;
@@ -264,9 +267,9 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     };
   }, [permission, facing, switching, image]);
 
-  function startPondAudio() {
-    const video = pondVideo.current;
-    if (!video) throw new Error('Pond video unavailable');
+  function startBackdropAudio() {
+    const video = backdropVideo.current;
+    if (!video) throw new Error('Backdrop video unavailable');
     if (!audio.current) {
       const context = new AudioContext();
       const output = context.createMediaStreamDestination();
@@ -328,7 +331,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     setMessage('');
     setPermission('loading');
     try {
-      startPondAudio();
+      startBackdropAudio();
       await connectCamera('user', false, true);
     } catch (error) {
       if (!open.current) return;
@@ -380,7 +383,7 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
     }
     if (downloadUrl.current) URL.revokeObjectURL(downloadUrl.current);
     const url = URL.createObjectURL(blob);
-    const filename = 'smara-lotus-pond-' + Date.now() + '.' + extension;
+    const filename = 'smara-' + slug + '-' + Date.now() + '.' + extension;
     downloadUrl.current = url;
     setSaved({ url, filename });
     if (!autoDownload) return;
@@ -463,15 +466,15 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
   return (
     <dialog
       ref={dialog}
-      aria-label="Moonlit Lotus Pond camera experience"
+      aria-label={`${name} camera experience`}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
       className="m-auto max-h-none max-w-none overflow-hidden rounded-2xl bg-black p-0 text-white backdrop:bg-black/75"
       style={{ width: 'min(calc(100vw - 2rem), calc(56.25dvh - 1.125rem), 1080px)' }}
     >
       <div className="relative aspect-[9/16]">
         <video
-          ref={pondVideo}
-          src="/images/ar-moonlit-lotus-pond-loop.mp4"
+          ref={backdropVideo}
+          src={video}
           poster={image}
           autoPlay
           loop
@@ -533,18 +536,17 @@ function PondExperience({ image, onClose }: { image: string; onClose: () => void
 }
 
 function ArExperiencePage() {
-  const [pondOpen, setPondOpen] = useState(false);
-  const pond = arSamples[0];
+  const [selectedSample, setSelectedSample] = useState<ArSample | null>(null);
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
         <h1 className="display">Augment Reality (AR) Experience</h1>
         <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-2 sm:gap-6">
-          {arSamples.map(({ name, image }) => (
-            <li key={name} className="relative min-w-0">
+          {arSamples.map((sample) => (
+            <li key={sample.slug} className="relative min-w-0">
               <img
-                src={image}
-                alt={name}
+                src={sample.image}
+                alt={sample.name}
                 width={1080}
                 height={1920}
                 className="block h-auto w-full rounded-2xl sm:rounded-3xl"
@@ -552,9 +554,8 @@ function ArExperiencePage() {
               <div className="absolute inset-0 grid place-items-center p-1.5 sm:p-3">
                 <button
                   type="button"
-                  disabled={name !== pond.name}
-                  onClick={() => setPondOpen(true)}
-                  aria-label={`click me to experience ${name}${name === pond.name ? '' : ' (coming soon)'}`}
+                  onClick={() => setSelectedSample(sample)}
+                  aria-label={`click me to experience ${sample.name}`}
                   className="flex min-h-11 max-w-full flex-col items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-sm"
                 >
                   <Camera size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
@@ -564,7 +565,7 @@ function ArExperiencePage() {
             </li>
           ))}
         </ul>
-        {pondOpen && <PondExperience image={pond.image} onClose={() => setPondOpen(false)} />}
+        {selectedSample && <CameraExperience key={selectedSample.slug} sample={selectedSample} onClose={() => setSelectedSample(null)} />}
       </main>
       <Footer />
     </div>
