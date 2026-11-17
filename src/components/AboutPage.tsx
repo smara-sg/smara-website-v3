@@ -1,7 +1,80 @@
-import { useState } from 'react';
-import { Heart, Mail } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Heart, Mail, Pause, Play } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
+
+const MeditationPractice = () => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    setHasError(false);
+    if (audio.error) audio.load();
+    try {
+      await audio.play();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        setHasError(true);
+      }
+    }
+  };
+
+  return (
+    <div className="absolute inset-y-0 -right-3 left-[calc(50%+2.5rem)] z-10">
+      <style>{`
+        @keyframes meditation-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgb(37 97 121 / 16%); }
+          50% { box-shadow: 0 0 0 6px rgb(37 97 121 / 4%); }
+        }
+        @keyframes meditation-bubble-in {
+          from { opacity: 0; transform: translateX(-4px) scale(.97); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
+      <audio
+        ref={audioRef}
+        src="/lilian-meditation-practice.mp3"
+        preload="none"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        onError={() => {
+          setPlaying(false);
+          setHasError(true);
+        }}
+      />
+      <div className="text-left">
+        <button
+          type="button"
+          aria-label={playing ? 'Pause meditation practice' : 'Play meditation practice with Lilian Ong'}
+          aria-describedby={playing ? undefined : 'lilian-practice-invitation'}
+          onClick={togglePlayback}
+          className="absolute bottom-0 left-0 grid h-11 w-11 place-items-center rounded-full bg-accent text-white ring-2 ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-safe:animate-[meditation-pulse_4s_ease-in-out_infinite]"
+        >
+          {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+        </button>
+        {!playing && (
+          <p
+            id="lilian-practice-invitation"
+            className="absolute bottom-12 left-4 right-0 max-w-[9rem] origin-bottom-left rounded-xl bg-mist px-2 py-1.5 text-[11px] leading-snug text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
+          >
+            <span aria-hidden="true" className="absolute -bottom-1 left-2 h-2 w-2 rotate-45 bg-mist" />
+            {hasError ? (
+              <span role="status">Audio couldn’t play. Tap play to try again.</span>
+            ) : 'Try a 3-minute soothing audio practice here. Close your eyes for best effect!'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AboutPage = () => {
   const [formData, setFormData] = useState({
@@ -118,13 +191,16 @@ ties.
           {teamMembers.map((member) => (
             <div key={member.name} className="rounded-3xl bg-white px-6 py-10 text-center">
               <div>
-                <div className="relative mx-auto mb-5 h-28 w-28 overflow-hidden rounded-full bg-mist">
-                  <OptimizedImage
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="hover:scale-105 transition-transform duration-300"
-                  />
+                <div className="relative mb-5">
+                  <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full bg-mist">
+                    <OptimizedImage
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      className="hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  {member.name === 'Lilian Ong' && <MeditationPractice />}
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-medium text-ink">{member.name}</h3>

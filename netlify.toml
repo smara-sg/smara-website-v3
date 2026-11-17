@@ -31,3 +31,8 @@ node_bundler = "esbuild"
   from = "/art-cards"
   to = "/art-cards/index.html"
   status = 200
+
+[[redirects]]
+  from = "/ar-experience"
+  to = "/ar-experience/index.html"
+  status = 200

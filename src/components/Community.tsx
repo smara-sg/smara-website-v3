@@ -40,12 +40,12 @@ const Community = () => {
   return (
     <section className="section bg-mist">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="display">Join Our Community</h2>
-        <p className="lede mt-8">
+        <h2 className="display on-painting">Join Our Community</h2>
+        <p className="lede on-painting mt-8">
           Stay tuned to our upcoming releases of new AR filters, and connect with others practicing self-gaze meditation.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-12">
+        <form onSubmit={handleSubmit} className="glass mt-12 rounded-3xl p-6">
           <div className="flex flex-col gap-3 sm:flex-row">
             <label className="sr-only" htmlFor="community-email">Email address</label>
             <input
@@ -70,11 +70,11 @@ const Community = () => {
           <p className="mt-6 text-ink">Sorry, there was an error subscribing. Please try again later.</p>
         )}
 
-        <div className="mt-10 flex justify-center gap-8 text-sm">
-          <a href="https://www.tiktok.com/@smara_online" className="text-accent hover:underline">
+        <div className="on-painting mt-10 flex justify-center gap-8 text-sm">
+          <a href="https://www.tiktok.com/@smara_online" className="text-ink hover:underline">
             Follow TikTok
           </a>
-          <a href="https://www.instagram.com/smaraonline/" className="text-accent hover:underline">
+          <a href="https://www.instagram.com/smaraonline/" className="text-ink hover:underline">
             Follow Instagram
           </a>
         </div>

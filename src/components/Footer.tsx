@@ -1,3 +1,4 @@
+import { Instagram, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { scrollToTop } from '../utils/scrollToTop';
 
@@ -38,13 +39,24 @@ const Footer = () => {
             <h4 className="text-sm font-medium text-ink">Connect With Us</h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <a href="mailto:hello@smara.online" className="text-mute hover:text-ink">hello@smara.online</a>
+                <a href="mailto:hello@smara.online" className="inline-flex items-center gap-2 text-mute hover:text-ink">
+                  <Mail size={16} strokeWidth={1.5} aria-hidden="true" className="shrink-0" />
+                  hello@smara.online
+                </a>
               </li>
               <li>
-                <a href="https://www.instagram.com/smaraonline/" className="text-mute hover:text-ink">@smaraonline</a>
+                <a href="https://www.instagram.com/smaraonline/" className="inline-flex items-center gap-2 text-mute hover:text-ink">
+                  <Instagram size={16} strokeWidth={1.5} aria-hidden="true" className="shrink-0" />
+                  @smaraonline
+                </a>
               </li>
               <li>
-                <a href="https://www.tiktok.com/@smara_online" className="text-mute hover:text-ink">@smara_online</a>
+                <a href="https://www.tiktok.com/@smara_online" className="inline-flex items-center gap-2 text-mute hover:text-ink">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+                    <path d="M9 12a4 4 0 1 0 4 4V4h4a4 4 0 0 0 4 4v4a8 8 0 0 1-4-1v5a8 8 0 1 1-8-8z" />
+                  </svg>
+                  @smara_online
+                </a>
               </li>
             </ul>
           </div>

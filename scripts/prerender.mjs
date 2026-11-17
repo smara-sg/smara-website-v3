@@ -19,12 +19,13 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--seo:start--
 
 const { render } = await import(pathToFileURL(serverEntry).href)
 
-const routes = ['/', '/gallery', '/events', '/about', '/art-cards']
+const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience']
 const markers = {
   '/': 'Self-Gaze Meditation Augmented Reality Art',
   '/gallery': 'SMARA Artworks For Sale',
   '/events': 'SMARA Events',
   '/about': 'About SMARA',
+  '/ar-experience': 'Augment Reality (AR) Experience',
   '/art-cards': 'Transform Art into Interactive Meditation',
 }
 
