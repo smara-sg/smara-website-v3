@@ -1,35 +1,23 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara1a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+    <section className="relative flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.38),rgba(255,255,255,0.1)_42%,transparent_70%)]" />
 
-      {/* Restored Dark Scrim & Soft Blur Overlay */}
-      <div className="absolute inset-0 z-[-1] bg-slate-950/45 backdrop-blur-[2px]" />
-      
-      {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 animate-fade-in">
-        <h1 className="text-5xl md:text-7xl font-light mb-6 tracking-wide [text-shadow:0_2px_8px_rgba(0,0,0,0.75)]">
+      <div className="rise relative mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 className="text-6xl font-semibold tracking-tight text-ink md:text-8xl">
           SMARA
         </h1>
-        <h2 className="text-2xl md:text-3xl font-light mb-8 [text-shadow:0_2px_6px_rgba(0,0,0,0.65)]">
+        <h2 className="mx-auto mt-5 max-w-4xl text-balance text-2xl font-medium tracking-tight text-ink md:text-4xl">
           Self-Gaze Meditation Augmented Reality Art
         </h2>
-        <h3 className="text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed [text-shadow:0_1px_4px_rgba(0,0,0,0.65)]">
+        <h3 className="mx-auto mt-6 max-w-xl text-balance text-lg font-normal leading-relaxed text-[#2c2c2e] md:text-xl">
           Discover inner peace as art, music, and your own reflection guide you inward.
         </h3>
+        <Link to="/gallery" className="btn-primary mt-10">
+          Artwork
+        </Link>
       </div>
     </section>
   );

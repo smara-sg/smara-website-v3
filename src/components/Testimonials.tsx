@@ -1,6 +1,3 @@
-import React from 'react';
-import { Quote } from 'lucide-react';
-
 const Testimonials = () => {
   const testimonials = [
     {
@@ -36,56 +33,28 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="relative">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara2a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+    <section className="section">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="display on-painting">What People Are Saying</h2>
+        <p className="lede on-painting mt-8">
+          Hear from our community of mindfulness practitioners and art lovers
+        </p>
       </div>
 
-      {/* Restored Dark Scrim & Soft Blur Overlay */}
-      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
-      
-      <div className="relative z-10 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
-              What People Are Saying
-            </h2>
-            <p className="text-lg text-white max-w-3xl mx-auto [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
-              Hear from our community of mindfulness practitioners and art lovers
-            </p>
-          </div>
-          <div className="flex overflow-x-auto space-x-6 px-4 sm:px-6 lg:px-8 pb-4">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="flex-none w-80 glass-emerald rounded-2xl p-6 hover-lift transition-all duration-300 animate-fade-in">
-                <div className="flex justify-center mb-4">
-                  <Quote className="w-8 h-8 text-emerald-400 animate-pulse-slow" />
-                </div>
-                <blockquote className="text-white leading-relaxed mb-4 text-center italic [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
-                  "{testimonial.quote}"
-                </blockquote>
-                <div className="text-center">
-                  <p className="text-white font-medium [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.author}</p>
-                  <p className="text-gray-100 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">{testimonial.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Scroll indicator */}
-          <div className="text-center mt-6">
-            <p className="text-gray-100 text-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">← Scroll to read more testimonials →</p>
-          </div>
-        </div>
+      <div className="mt-16 flex snap-x gap-5 overflow-x-auto px-6 pb-2 md:px-[max(1.5rem,calc((100%-72rem)/2))]">
+        {testimonials.map((testimonial) => (
+          <figure key={testimonial.author} className="glass w-[min(85vw,22rem)] flex-none snap-start rounded-3xl p-8">
+            <blockquote className="text-lg leading-relaxed text-ink">
+              “{testimonial.quote}”
+            </blockquote>
+            <figcaption className="mt-8">
+              <p className="font-medium text-ink">{testimonial.author}</p>
+              <p className="text-sm text-mute">{testimonial.location}</p>
+            </figcaption>
+          </figure>
+        ))}
       </div>
+      <p className="on-painting mt-6 text-center text-sm text-ink">← Scroll to read more testimonials →</p>
     </section>
   );
 };

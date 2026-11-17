@@ -1,6 +1,80 @@
-import { useState } from 'react';
-import { Heart, Mail } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Heart, Mail, Pause, Play } from 'lucide-react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
+
+const MeditationPractice = () => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    setHasError(false);
+    if (audio.error) audio.load();
+    try {
+      await audio.play();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        setHasError(true);
+      }
+    }
+  };
+
+  return (
+    <div className="absolute inset-y-0 -right-3 left-[calc(50%+2.5rem)] z-10">
+      <style>{`
+        @keyframes meditation-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgb(37 97 121 / 16%); }
+          50% { box-shadow: 0 0 0 6px rgb(37 97 121 / 4%); }
+        }
+        @keyframes meditation-bubble-in {
+          from { opacity: 0; transform: translateX(-4px) scale(.97); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
+      <audio
+        ref={audioRef}
+        src="/lilian-meditation-practice.mp3"
+        preload="none"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        onError={() => {
+          setPlaying(false);
+          setHasError(true);
+        }}
+      />
+      <div className="text-left">
+        <button
+          type="button"
+          aria-label={playing ? 'Pause meditation practice' : 'Play meditation practice with Lilian Ong'}
+          aria-describedby={playing ? undefined : 'lilian-practice-invitation'}
+          onClick={togglePlayback}
+          className="absolute bottom-0 left-0 grid h-11 w-11 place-items-center rounded-full bg-accent text-white ring-2 ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-safe:animate-[meditation-pulse_4s_ease-in-out_infinite]"
+        >
+          {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+        </button>
+        {!playing && (
+          <p
+            id="lilian-practice-invitation"
+            className="absolute bottom-12 left-4 right-0 max-w-[9rem] origin-bottom-left rounded-xl bg-mist px-2 py-1.5 text-[11px] leading-snug text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
+          >
+            <span aria-hidden="true" className="absolute -bottom-1 left-2 h-2 w-2 rotate-45 bg-mist" />
+            {hasError ? (
+              <span role="status">Audio couldn’t play. Tap play to try again.</span>
+            ) : 'Try a 3-minute soothing audio practice here. Close your eyes for best effect!'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AboutPage = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +120,7 @@ const AboutPage = () => {
       } else {
         setSubmitStatus('error');
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -75,23 +149,18 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-4xl md:text-5xl font-light text-gray-800 text-center">
-            About SMARA
-          </h1>
-        </div>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-3xl px-6 pb-4 pt-24 text-center md:pt-32">
+        <h1 className="display">
+          About SMARA
+        </h1>
       </div>
 
-      {/* What is Smara Section */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="glass-emerald rounded-2xl p-8 lg:p-12 hover-lift animate-fade-in">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-light text-gray-800 mb-6">What is SMARA?</h2>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
+      <section className="section">
+        <div className="mx-auto grid max-w-5xl items-start gap-12 md:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-semibold tracking-tight text-ink">What is SMARA?</h2>
+            <div className="mt-6 space-y-4 leading-relaxed text-mute">
                 <p>
                   SMARA is a mindfulness practice that involves a deep and direct gaze at one's own reflection. It offers many benefits including
 improving mental well-being and finding a sense of relaxation and calm. The practice also increases self-awareness, relieves stress and allows
@@ -104,39 +173,39 @@ ties.
                 </p>
               </div>
             </div>
-            <div className="flex justify-center">
-              <div className="w-80 h-80 gradient-ocean rounded-2xl flex items-center justify-center animate-float">
-                <Heart size={80} className="text-white animate-pulse-slow" />
-              </div>
+            <div className="flex items-center justify-center md:justify-end">
+              <Heart size={72} strokeWidth={1} className="text-accent/70" />
             </div>
           </div>
-        </div>
       </section>
 
-      {/* Who is Behind Smara Section */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-light text-gray-800 mb-4">Who is Behind SMARA?</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+      <section className="section bg-mist">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-4xl font-semibold tracking-tight text-ink">Who is Behind SMARA?</h2>
+          <p className="lede mt-6">
             Meet the passionate team dedicated to bringing mindfulness and technology together for your wellbeing.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {teamMembers.map((member, index) => (
-            <div key={index} className="glass-card rounded-2xl overflow-hidden hover-lift transition-shadow duration-300 animate-fade-in">
-              <div className="p-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
+        <div className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-3">
+          {teamMembers.map((member) => (
+            <div key={member.name} className="rounded-3xl bg-white px-6 py-10 text-center">
+              <div>
+                <div className="relative mb-5">
+                  <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full bg-mist">
+                    <OptimizedImage
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      className="hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  {member.name === 'Lilian Ong' && <MeditationPractice />}
                 </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-medium text-gray-800 mb-2">{member.name}</h3>
-                  <p className="text-blue-600 font-medium mb-3">{member.role}</p>
-                  <p className="text-gray-600 text-sm leading-relaxed">{member.description}</p>
+                  <h3 className="text-lg font-medium text-ink">{member.name}</h3>
+                  <p className="mt-1 text-sm text-accent">{member.role}</p>
+                  <p className="mt-4 text-sm leading-relaxed text-mute">{member.description}</p>
                 </div>
               </div>
             </div>
@@ -145,11 +214,11 @@ ties.
       </section>
 
       {/* Contact Info Section */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="glass-ocean rounded-2xl p-8 lg:p-12 hover-lift animate-fade-in">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-light text-gray-800 mb-4">Contact Us</h2>
-            <p className="text-lg text-gray-600">
+      <section className="section">
+        <div className="mx-auto max-w-xl">
+          <div className="text-center">
+            <h2 className="text-4xl font-semibold tracking-tight text-ink">Contact Us</h2>
+            <p className="lede mt-6">
               We'd love to hear from you. Fill out the form below and we'll get back to you soon.
             </p>
           </div>
@@ -157,19 +226,19 @@ ties.
           <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
             {/* Status Messages */}
             {submitStatus === 'success' && (
-              <div className="p-4 bg-green-100 border border-green-300 rounded-lg text-center animate-fade-in">
-                <p className="text-green-800">Thank you for your message! We'll get back to you soon.</p>
+              <div className="rounded-2xl bg-mist px-4 py-3 text-center">
+                <p className="text-ink">Thank you for your message! We'll get back to you soon.</p>
               </div>
             )}
             
             {submitStatus === 'error' && (
-              <div className="p-4 bg-red-100 border border-red-300 rounded-lg text-center animate-fade-in">
-                <p className="text-red-800">Sorry, there was an error sending your message. Please try again later.</p>
+              <div className="rounded-2xl bg-mist px-4 py-3 text-center">
+                <p className="text-ink">Sorry, there was an error sending your message. Please try again later.</p>
               </div>
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="mb-2 block text-sm font-medium text-ink">
                 Name
               </label>
               <input
@@ -179,13 +248,13 @@ ties.
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                className="field"
                 placeholder="Your full name"
               />
             </div>
 
             <div>
-              <label htmlFor="enquiry" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="enquiry" className="mb-2 block text-sm font-medium text-ink">
                 Enquiry
               </label>
               <textarea
@@ -195,13 +264,13 @@ ties.
                 onChange={handleInputChange}
                 required
                 rows={5}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-vertical"
+                className="field resize-y"
                 placeholder="Tell us about your enquiry, questions, or feedback..."
               />
             </div>
 
             <div>
-              <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="contact" className="mb-2 block text-sm font-medium text-ink">
                 Contact Number/Email
               </label>
               <input
@@ -211,7 +280,7 @@ ties.
                 value={formData.contact}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                className="field"
                 placeholder="Your phone number or email address"
               />
             </div>
@@ -220,10 +289,10 @@ ties.
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="gradient-emerald hover-lift text-white px-8 py-3 rounded-full font-medium transition-all duration-200 flex items-center justify-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary"
               >
-                <Mail size={20} />
-                <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                <Mail size={18} />
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>

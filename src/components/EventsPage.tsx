@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import Footer from './Footer';
+import OptimizedImage from './OptimizedImage';
+
+type EventImage = { src: string; width?: number; height?: number }
 
 const EventsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({
@@ -9,15 +12,22 @@ const EventsPage = () => {
     2: 0
   });
 
-  const events = [
+  const events: Array<{
+    id: number
+    title: string
+    description: string
+    images: EventImage[]
+    date: string
+    location: string
+  }> = [
     {
       id: 0,
       title: "SMARA @ SAMH",
       description: "A two-day event featuring various mindfulness activities for the neighbourhood elderly. Participants were invited to experience self-gaze meditation sessions, alongside other activities planned by SAMH.",
       images: [
-                "/images/samh1.jpg",
-        "/images/samh2.jpg",
-        "/images/samh3.jpg"
+        { src: "/images/samh1.jpg" },
+        { src: "/images/samh2.jpg" },
+        { src: "/images/samh3.jpg" }
       ],
       date: "June 20–21, 2025",
       location: "SAMH, Mental Wellness for All"
@@ -27,9 +37,9 @@ const EventsPage = () => {
       title: "SMARA In The Heartlands",
       description: "Spot us at various SMARA calming spaces around Singapore, and discover the SMARA experience by scanning the QR on our stickers. An invitation to join us in this SMARA movement.",
       images: [
-        "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3822621/pexels-photo-3822621.jpeg?auto=compress&cs=tinysrgb&w=800"
+        { src: "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 1200 },
+        { src: "https://images.pexels.com/photos/3094230/pexels-photo-3094230.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 533 },
+        { src: "https://images.pexels.com/photos/3822621/pexels-photo-3822621.jpeg?auto=compress&cs=tinysrgb&w=800", width: 800, height: 1200 }
       ],
       date: "Q4 2025",
       location: "Various Community Centres, Singapore"
@@ -39,7 +49,7 @@ const EventsPage = () => {
       title: "Watch this space for future events!",
       description: "Coming Soon",
       images: [
-        "/images/cate.gif"
+        { src: "/images/cate.gif" }
       ],
       date: "Coming Soon",
       location: "Coming soon"
@@ -62,48 +72,46 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mt-12 mb-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          </div>
-          <h1 className="text-4xl md:text-5xl font-light text-gray-800 text-center">
-            SMARA Events
-          </h1>
-          <p className="text-lg text-gray-600 text-center mt-4 max-w-2xl mx-auto">
-            Join our community for workshops, retreats, and gatherings focused on self-gaze meditation and mindful living.
-          </p>
-        </div>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-3xl px-6 pb-4 pt-24 text-center md:pt-32">
+        <h1 className="display">
+          SMARA Events
+        </h1>
+        <p className="lede mt-8">
+          Join our community for workshops, retreats, and gatherings focused on self-gaze meditation and mindful living.
+        </p>
       </div>
 
-      {/* Events Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <div key={event.id} className="glass-card rounded-2xl overflow-hidden hover-lift transition-shadow duration-300 animate-fade-in">
+            <div key={event.id} className="overflow-hidden rounded-3xl bg-mist">
               <div className="grid grid-cols-1 gap-0">
                 {/* Image Carousel */}
                 <div className="relative h-80 lg:h-96">
-                  <img
-                    src={event.images[currentImageIndex[event.id]]}
+                  <OptimizedImage
+                    src={event.images[currentImageIndex[event.id]].src}
                     alt={`${event.title} - Image ${currentImageIndex[event.id] + 1}`}
-                    className="w-full h-full object-cover"
+                    width={event.images[currentImageIndex[event.id]].width}
+                    height={event.images[currentImageIndex[event.id]].height}
+                    fill
                   />
                   
                   {/* Carousel Controls */}
                   <button
                     onClick={() => prevImage(event.id, event.images.length)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+                    className="icon-btn left-3"
+                    aria-label={`Previous image for ${event.title}`}
                   >
-                    <ChevronLeft size={20} className="text-gray-700" />
+                    <ChevronLeft size={18} />
                   </button>
-                  
+
                   <button
                     onClick={() => nextImage(event.id, event.images.length)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-colors duration-200"
+                    className="icon-btn right-3"
+                    aria-label={`Next image for ${event.title}`}
                   >
-                    <ChevronRight size={20} className="text-gray-700" />
+                    <ChevronRight size={18} />
                   </button>
 
                   {/* Image Indicators */}
@@ -121,22 +129,22 @@ const EventsPage = () => {
                 </div>
 
                 {/* Event Content */}
-                <div className="p-6 flex flex-col justify-center">
-                  <h2 className="text-2xl md:text-3xl font-light text-gray-800 mb-4">
+                <div className="flex flex-col justify-center p-7">
+                  <h2 className="text-2xl font-semibold tracking-tight text-ink">
                     {event.title}
                   </h2>
-                  
-                  <p className="text-gray-600 leading-relaxed mb-6">
+
+                  <p className="mt-3 leading-relaxed text-mute">
                     {event.description}
                   </p>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center text-gray-500">
-                      <Calendar size={18} className="mr-3" />
+                  <div className="mt-6 space-y-2 text-sm text-mute">
+                    <div className="flex items-center">
+                      <Calendar size={16} className="mr-3" />
                       <span>{event.date}</span>
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <MapPin size={18} className="mr-3" />
+                    <div className="flex items-center">
+                      <MapPin size={16} className="mr-3" />
                       <span>{event.location}</span>
                     </div>
                   </div>

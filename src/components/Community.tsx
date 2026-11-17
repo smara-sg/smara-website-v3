@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Mail, Instagram, Music } from 'lucide-react';
 
 const Community = () => {
   const [email, setEmail] = useState('');
@@ -8,12 +7,12 @@ const Community = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim()) return;
-    
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
-    
+
     try {
       const response = await fetch('/.netlify/functions/subscribe', {
         method: 'POST',
@@ -22,9 +21,9 @@ const Community = () => {
         },
         body: JSON.stringify({ email }),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok && result.success) {
         setSubmitStatus('success');
         setEmail('');
@@ -39,88 +38,45 @@ const Community = () => {
   };
 
   return (
-    <section className="relative">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-[-2]"
-        style={{ 
-          backgroundImage: 'url(/images/smara3a.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-      </div>
+    <section className="section bg-mist">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="display on-painting">Join Our Community</h2>
+        <p className="lede on-painting mt-8">
+          Stay tuned to our upcoming releases of new AR filters, and connect with others practicing self-gaze meditation.
+        </p>
 
-      {/* Restored Dark Scrim & Soft Blur Overlay */}
-      <div className="absolute inset-0 z-[-1] bg-slate-950/55 backdrop-blur-[3px]" />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
-            Join Our Community
-          </h2>
-          <p className="text-lg text-gray-100 max-w-3xl mx-auto leading-relaxed [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
-            Stay tuned to our upcoming releases of new AR filters, and connect with others practicing self-gaze meditation.
-          </p>
-        </div>
-
-        <div className="max-w-2xl mx-auto">
-          {/* Email Signup */}
-          <form onSubmit={handleSubmit} className="mb-12 animate-fade-in">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  className="w-full px-6 py-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-400"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-8 py-4 gradient-emerald hover-lift text-white rounded-full font-medium transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Mail size={20} />
-                <span>{isSubmitting ? 'Subscribing...' : 'Subscribe'}</span>
-              </button>
-            </div>
-          </form>
-
-          {/* Status Messages */}
-          {submitStatus === 'success' && (
-            <div className="mb-8 p-4 bg-green-500/20 border border-green-500/30 rounded-lg text-center animate-fade-in">
-              <p className="text-green-200">Thank you for subscribing! We'll keep you updated on new AR filters and events.</p>
-            </div>
-          )}
-          
-          {submitStatus === 'error' && (
-            <div className="mb-8 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-center animate-fade-in">
-              <p className="text-red-200">Sorry, there was an error subscribing. Please try again later.</p>
-            </div>
-          )}
-
-          {/* Social Links */}
-          <div className="flex justify-center space-x-6 animate-fade-in">
-            <a
-              href="https://www.tiktok.com/@smara_online"
-              className="flex items-center space-x-2 px-6 py-3 glass-card rounded-full hover-lift transition-shadow duration-200 text-white hover:text-pink-400"
-            >
-              <Music size={20} />
-              <span>Follow TikTok</span>
-            </a>
-            <a
-              href="https://www.instagram.com/smaraonline/"
-              className="flex items-center space-x-2 px-6 py-3 glass-card rounded-full hover-lift transition-shadow duration-200 text-white hover:text-pink-400"
-            >
-              <Instagram size={20} />
-              <span>Follow Instagram</span>
-            </a>
+        <form onSubmit={handleSubmit} className="glass mt-12 rounded-3xl p-6">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <label className="sr-only" htmlFor="community-email">Email address</label>
+            <input
+              id="community-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="field flex-1 bg-white text-center sm:text-left"
+              required
+            />
+            <button type="submit" disabled={isSubmitting} className="btn-primary">
+              {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+            </button>
           </div>
+        </form>
+
+        {submitStatus === 'success' && (
+          <p className="mt-6 text-ink">Thank you for subscribing! We'll keep you updated on new AR filters and events.</p>
+        )}
+        {submitStatus === 'error' && (
+          <p className="mt-6 text-ink">Sorry, there was an error subscribing. Please try again later.</p>
+        )}
+
+        <div className="on-painting mt-10 flex justify-center gap-8 text-sm">
+          <a href="https://www.tiktok.com/@smara_online" className="text-ink hover:underline">
+            Follow TikTok
+          </a>
+          <a href="https://www.instagram.com/smaraonline/" className="text-ink hover:underline">
+            Follow Instagram
+          </a>
         </div>
       </div>
     </section>
