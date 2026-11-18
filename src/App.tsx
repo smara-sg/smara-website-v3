@@ -34,13 +34,14 @@ function Home() {
 }
 
 const arSamples = [
-  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-loop.mp4' },
-  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-loop.mp4' },
-  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-loop.mp4' },
+  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-seamless.mp4' },
+  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-seamless.mp4' },
+  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-seamless.mp4' },
 ];
 
 type ArSample = (typeof arSamples)[number];
 
+const arLogo = '/images/smara-ar-logo.png';
 const maxRecordingSeconds = 60;
 
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
@@ -153,6 +154,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
 
     const background = new Image();
     background.src = image;
+    const logo = new Image();
+    logo.src = arLogo;
     let active = true;
     let segmenter: PersonSegmenter | undefined;
     let timer: number | undefined;
@@ -240,11 +243,18 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         ctx.drawImage(background, 0, 0, output.width, output.height);
       }
       ctx.drawImage(foreground, 0, 0);
+      ctx.save();
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+      ctx.shadowBlur = 14;
+      const logoHeight = 76;
+      const logoWidth = logoHeight * logo.naturalWidth / logo.naturalHeight;
+      ctx.drawImage(logo, 34, output.height - logoHeight - 34, logoWidth, logoHeight);
+      ctx.restore();
     }
 
     async function startSegmentation() {
       try {
-        await background.decode();
+        await Promise.all([background.decode(), logo.decode()]);
         if (!active) return;
         const model = await loadPersonSegmenter();
         if (!active) {
@@ -483,6 +493,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
         />
+        {!ready && <img src={arLogo} alt="" className="pointer-events-none absolute bottom-[1.77%] left-[3.15%] z-10 h-[3.96%] w-auto drop-shadow-[0_0_5px_rgba(255,255,255,0.75)]" />}
         <video ref={camera} muted playsInline className="sr-only" aria-hidden="true" />
         <canvas ref={canvas} width={1080} height={1920} className={`absolute inset-0 h-full w-full ${ready ? '' : 'invisible'}`} aria-hidden="true" />
         {reviewingVideo && (
