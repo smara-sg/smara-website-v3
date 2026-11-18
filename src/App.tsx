@@ -159,7 +159,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
     if (leaves) leaves.src = '/images/lotus-foreground-leaves.png';
     const rightLeaves = leaves ? new Image() : undefined;
-    if (rightLeaves) rightLeaves.src = '/images/lotus-foreground-leaves-right.png';
+    if (rightLeaves) rightLeaves.src = '/images/lotus-foreground-leaves-right-v2.png';
     const breezeStartedAt = performance.now();
     let active = true;
     let segmenter: PersonSegmenter | undefined;
@@ -259,9 +259,9 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           const leafWidth = leafHeight * sprite.naturalWidth / sprite.naturalHeight;
           ctx.save();
           ctx.translate(side === -1 ? -24 : output.width + 24, output.height + 38);
-          ctx.scale(side === -1 ? 1 : -1, 1);
-          ctx.rotate(sway + (side === 1 ? -0.12 : 0));
-          ctx.drawImage(sprite, -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
+          // The reference cluster leans toward the right edge in its original orientation.
+          ctx.rotate(side === 1 ? sway * 0.7 : sway);
+          ctx.drawImage(sprite, side === 1 ? -leafWidth : -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
           ctx.restore();
         }
       }
@@ -627,5 +627,6 @@ function App() {
 }
 
 export default App;
+
 
 
