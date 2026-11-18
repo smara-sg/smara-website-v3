@@ -42,6 +42,8 @@ const arSamples = [
 type ArSample = (typeof arSamples)[number];
 
 const arLogo = '/images/smara-ar-logo.png';
+// Set to zero to remove the optional, very faint lily-pond sky movement.
+const lotusSkyMistOpacity = 0.055;
 const maxRecordingSeconds = 60;
 
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
@@ -157,9 +159,33 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     const logo = new Image();
     logo.src = arLogo;
     const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
-    if (leaves) leaves.src = '/images/lotus-foreground-leaves.png';
+    if (leaves) leaves.src = '/images/lotus-foreground-leaves-left-v2.png';
     const rightLeaves = leaves ? new Image() : undefined;
     if (rightLeaves) rightLeaves.src = '/images/lotus-foreground-leaves-right-v2.png';
+
+    // Build the soft cloud once; only its position changes during compositing.
+    const skyMist = leaves ? document.createElement('canvas') : undefined;
+    if (skyMist) {
+      skyMist.width = 960;
+      skyMist.height = 380;
+      const mist = skyMist.getContext('2d');
+      if (mist) {
+        for (const [x, y, width, height] of [
+          [240, 200, 210, 95], [460, 155, 250, 130], [700, 210, 220, 100],
+        ]) {
+          mist.save();
+          mist.translate(x, y);
+          mist.scale(width, height);
+          const glow = mist.createRadialGradient(0, 0, 0, 0, 0, 1);
+          glow.addColorStop(0, 'rgba(205, 213, 240, 0.8)');
+          glow.addColorStop(0.45, 'rgba(197, 207, 234, 0.35)');
+          glow.addColorStop(1, 'rgba(197, 207, 234, 0)');
+          mist.fillStyle = glow;
+          mist.fillRect(-1, -1, 2, 2);
+          mist.restore();
+        }
+      }
+    }
     const breezeStartedAt = performance.now();
     let active = true;
     let segmenter: PersonSegmenter | undefined;
@@ -246,6 +272,17 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           cropWidth, cropHeight, 0, 0, output.width, output.height);
       } else {
         ctx.drawImage(background, 0, 0, output.width, output.height);
+      }
+      // Mist stays in the sky, behind the person, and is part of captured media.
+      if (skyMist && lotusSkyMistOpacity > 0) {
+        const cloudWidth = output.width * 0.95;
+        const cloudHeight = output.height * 0.20;
+        const progress = ((now - breezeStartedAt) / 240000 + 0.28) % 1;
+        const cloudX = -cloudWidth + progress * (output.width + 2 * cloudWidth);
+        ctx.save();
+        ctx.globalAlpha = lotusSkyMistOpacity;
+        ctx.drawImage(skyMist, cloudX, output.height * 0.055, cloudWidth, cloudHeight);
+        ctx.restore();
       }
       ctx.drawImage(foreground, 0, 0);
       // Composite over the person so the same moving leaves are captured in photos and videos.
@@ -627,6 +664,7 @@ function App() {
 }
 
 export default App;
+
 
 
 
