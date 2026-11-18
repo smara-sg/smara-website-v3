@@ -3,6 +3,12 @@ import { ChevronLeft, ChevronRight, Mail } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
 
+const carouselImages = [
+  { src: '/images/artwork-beach.jpg', alt: 'Serene tropical beach watercolor', width: 1774, height: 887 },
+  { src: '/images/artwork-lotus-pond.jpg', alt: 'Moonlit lotus pond watercolor', width: 1774, height: 887 },
+  { src: '/images/artwork-mountain.jpg', alt: 'Misty mountain watercolor', width: 1774, height: 887 },
+];
+
 const GalleryPage = () => {
   const [currentArtworkIndex, setCurrentArtworkIndex] = useState(0);
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
@@ -53,11 +59,11 @@ const GalleryPage = () => {
   };
 
   const nextCarouselImage = () => {
-    setCurrentCarouselIndex((prev) => (prev + 1) % 4);
+    setCurrentCarouselIndex((prev) => (prev + 1) % carouselImages.length);
   };
 
   const prevCarouselImage = () => {
-    setCurrentCarouselIndex((prev) => prev === 0 ? 3 : prev - 1);
+    setCurrentCarouselIndex((prev) => prev === 0 ? carouselImages.length - 1 : prev - 1);
   };
 
   const currentArtwork = artworks[currentArtworkIndex];
@@ -78,19 +84,21 @@ const GalleryPage = () => {
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="relative">
           <div className="overflow-hidden rounded-3xl bg-mist">
-            <div className="relative h-0 bg-mist pb-[68%]">
-              {[1, 2, 3, 4].map((num) => (
+            <div className="relative aspect-[2/1] bg-mist">
+              {carouselImages.map((image, index) => (
                 <div 
-                  key={num}
+                  key={image.src}
                   className={`absolute inset-0 transition-opacity duration-500 ${
-                    currentCarouselIndex + 1 === num ? 'opacity-100' : 'opacity-0'
+                    currentCarouselIndex === index ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
                   <OptimizedImage
-                    src={`/images/smarainplaces${num}.jpg`}
-                    alt={`SMARA in place ${num}`}
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
                     fill
-                    loading={currentCarouselIndex + 1 === num ? 'eager' : 'lazy'}
+                    loading={currentCarouselIndex === index ? 'eager' : 'lazy'}
                   />
                 </div>
               ))}
@@ -114,14 +122,15 @@ const GalleryPage = () => {
           </button>
 
           <div className="mt-5 flex justify-center gap-2">
-            {[1, 2, 3, 4].map((num) => (
+            {carouselImages.map((image, index) => (
               <button
-                key={num}
-                onClick={() => setCurrentCarouselIndex(num - 1)}
+                key={image.src}
+                onClick={() => setCurrentCarouselIndex(index)}
                 className={`h-1.5 rounded-full transition-all ${
-                  currentCarouselIndex + 1 === num ? 'w-6 bg-ink' : 'w-1.5 bg-line'
+                  currentCarouselIndex === index ? 'w-6 bg-ink' : 'w-1.5 bg-line'
                 }`}
-                aria-label={`View image ${num}`}
+                aria-label={`View image ${index + 1}`}
+                aria-current={currentCarouselIndex === index ? 'true' : undefined}
               />
             ))}
           </div>
