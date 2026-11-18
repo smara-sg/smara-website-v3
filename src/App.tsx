@@ -156,6 +156,9 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     background.src = image;
     const logo = new Image();
     logo.src = arLogo;
+    const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
+    if (leaves) leaves.src = '/images/lotus-foreground-leaves.png';
+    const breezeStartedAt = performance.now();
     let active = true;
     let segmenter: PersonSegmenter | undefined;
     let timer: number | undefined;
@@ -243,6 +246,22 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         ctx.drawImage(background, 0, 0, output.width, output.height);
       }
       ctx.drawImage(foreground, 0, 0);
+      // Composite over the person so the same moving leaves are captured in photos and videos.
+      if (leaves?.complete && leaves.naturalWidth) {
+        const elapsed = (now - breezeStartedAt) / 1000;
+        for (const side of [-1, 1]) {
+          const phase = elapsed * Math.PI * 2 / (side === -1 ? 5.2 : 6.1) + (side === -1 ? 0 : 1.7);
+          const sway = Math.sin(phase) * 0.065 + Math.sin(phase * 1.8) * 0.012;
+          const leafHeight = output.height * (side === -1 ? 0.29 : 0.265);
+          const leafWidth = leafHeight * leaves.naturalWidth / leaves.naturalHeight;
+          ctx.save();
+          ctx.translate(side === -1 ? -24 : output.width + 24, output.height + 38);
+          ctx.scale(side === -1 ? 1 : -1, 1);
+          ctx.rotate(sway);
+          ctx.drawImage(leaves, -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
+          ctx.restore();
+        }
+      }
       ctx.save();
       ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
       ctx.shadowBlur = 14;
@@ -255,6 +274,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     async function startSegmentation() {
       try {
         await Promise.all([background.decode(), logo.decode()]);
+        // A missing decorative asset must not stop the camera experience.
+        if (leaves) await leaves.decode().catch(() => undefined);
         if (!active) return;
         const model = await loadPersonSegmenter();
         if (!active) {
@@ -275,7 +296,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       window.clearInterval(timer);
       segmenter?.close();
     };
-  }, [permission, facing, switching, image]);
+  }, [permission, facing, switching, image, slug]);
 
   function startBackdropAudio() {
     const video = backdropVideo.current;
@@ -603,3 +624,4 @@ function App() {
 }
 
 export default App;
+
