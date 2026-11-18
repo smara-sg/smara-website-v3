@@ -26,8 +26,8 @@ const EventsPage = () => {
       description: "A two-day event featuring various mindfulness activities for the neighbourhood elderly. Participants were invited to experience self-gaze meditation sessions, alongside other activities planned by SAMH.",
       images: [
         { src: "/images/samh1.jpg" },
-        { src: "/images/samh2.jpg" },
-        { src: "/images/samh3.jpg" }
+        { src: "/images/samh2-upright.jpg", width: 1500, height: 2000 },
+        { src: "/images/samh3-upright.jpg", width: 1500, height: 2000 }
       ],
       date: "June 20–21, 2025",
       location: "SAMH, Mental Wellness for All"
@@ -60,14 +60,14 @@ const EventsPage = () => {
   const nextImage = (eventId: number, totalImages: number) => {
     setCurrentImageIndex(prev => ({
       ...prev,
-      [eventId]: (prev[eventId] + 1) % totalImages
+      [eventId]: ((prev[eventId] ?? 0) + 1) % totalImages
     }));
   };
 
   const prevImage = (eventId: number, totalImages: number) => {
     setCurrentImageIndex(prev => ({
       ...prev,
-      [eventId]: prev[eventId] === 0 ? totalImages - 1 : prev[eventId] - 1
+      [eventId]: (prev[eventId] ?? 0) === 0 ? totalImages - 1 : (prev[eventId] ?? 0) - 1
     }));
   };
 
@@ -90,10 +90,10 @@ const EventsPage = () => {
                 {/* Image Carousel */}
                 <div className="relative h-80 lg:h-96">
                   <OptimizedImage
-                    src={event.images[currentImageIndex[event.id]].src}
-                    alt={`${event.title} - Image ${currentImageIndex[event.id] + 1}`}
-                    width={event.images[currentImageIndex[event.id]].width}
-                    height={event.images[currentImageIndex[event.id]].height}
+                    src={event.images[currentImageIndex[event.id] ?? 0].src}
+                    alt={`${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
+                    width={event.images[currentImageIndex[event.id] ?? 0].width}
+                    height={event.images[currentImageIndex[event.id] ?? 0].height}
                     fill
                   />
                   
@@ -121,7 +121,7 @@ const EventsPage = () => {
                         key={index}
                         onClick={() => setCurrentImageIndex(prev => ({ ...prev, [event.id]: index }))}
                         className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                          currentImageIndex[event.id] === index ? 'bg-white' : 'bg-white/50'
+                          (currentImageIndex[event.id] ?? 0) === index ? 'bg-white' : 'bg-white/50'
                         }`}
                       />
                     ))}
@@ -139,6 +139,7 @@ const EventsPage = () => {
                   </p>
 
                   <div className="mt-6 space-y-2 text-sm text-mute">
+                    <p className="font-medium">Held on</p>
                     <div className="flex items-center">
                       <Calendar size={16} className="mr-3" />
                       <span>{event.date}</span>
@@ -161,3 +162,4 @@ const EventsPage = () => {
 };
 
 export default EventsPage;
+
