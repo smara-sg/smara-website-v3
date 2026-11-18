@@ -158,6 +158,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     logo.src = arLogo;
     const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
     if (leaves) leaves.src = '/images/lotus-foreground-leaves.png';
+    const rightLeaves = leaves ? new Image() : undefined;
+    if (rightLeaves) rightLeaves.src = '/images/lotus-foreground-leaves-right.png';
     const breezeStartedAt = performance.now();
     let active = true;
     let segmenter: PersonSegmenter | undefined;
@@ -252,13 +254,14 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         for (const side of [-1, 1]) {
           const phase = elapsed * Math.PI * 2 / (side === -1 ? 5.2 : 6.1) + (side === -1 ? 0 : 1.7);
           const sway = Math.sin(phase) * 0.065 + Math.sin(phase * 1.8) * 0.012;
-          const leafHeight = output.height * (side === -1 ? 0.29 : 0.265);
-          const leafWidth = leafHeight * leaves.naturalWidth / leaves.naturalHeight;
+          const sprite = side === 1 && rightLeaves?.complete && rightLeaves.naturalWidth ? rightLeaves : leaves;
+          const leafHeight = output.height * (side === -1 ? 0.29 : 0.18);
+          const leafWidth = leafHeight * sprite.naturalWidth / sprite.naturalHeight;
           ctx.save();
           ctx.translate(side === -1 ? -24 : output.width + 24, output.height + 38);
           ctx.scale(side === -1 ? 1 : -1, 1);
-          ctx.rotate(sway);
-          ctx.drawImage(leaves, -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
+          ctx.rotate(sway + (side === 1 ? -0.12 : 0));
+          ctx.drawImage(sprite, -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
           ctx.restore();
         }
       }
@@ -275,7 +278,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       try {
         await Promise.all([background.decode(), logo.decode()]);
         // A missing decorative asset must not stop the camera experience.
-        if (leaves) await leaves.decode().catch(() => undefined);
+        await Promise.all([leaves, rightLeaves].map(sprite => sprite?.decode().catch(() => undefined)));
         if (!active) return;
         const model = await loadPersonSegmenter();
         if (!active) {
@@ -624,4 +627,5 @@ function App() {
 }
 
 export default App;
+
 
