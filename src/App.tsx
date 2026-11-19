@@ -34,13 +34,16 @@ function Home() {
 }
 
 const arSamples = [
-  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-loop.mp4' },
-  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-loop.mp4' },
-  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-loop.mp4' },
+  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-seamless.mp4' },
+  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-seamless.mp4' },
+  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-seamless.mp4' },
 ];
 
 type ArSample = (typeof arSamples)[number];
 
+const arLogo = '/images/smara-ar-logo.png';
+// Set to zero to remove the optional, very faint lily-pond sky movement.
+const lotusSkyMistOpacity = 0.055;
 const maxRecordingSeconds = 60;
 
 const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
@@ -153,6 +156,37 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
 
     const background = new Image();
     background.src = image;
+    const logo = new Image();
+    logo.src = arLogo;
+    const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
+    if (leaves) leaves.src = '/images/lotus-foreground-leaves-left-v2.png';
+    const rightLeaves = leaves ? new Image() : undefined;
+    if (rightLeaves) rightLeaves.src = '/images/lotus-foreground-leaves-right-v2.png';
+
+    // Build the soft cloud once; only its position changes during compositing.
+    const skyMist = leaves ? document.createElement('canvas') : undefined;
+    if (skyMist) {
+      skyMist.width = 960;
+      skyMist.height = 380;
+      const mist = skyMist.getContext('2d');
+      if (mist) {
+        for (const [x, y, width, height] of [
+          [240, 200, 210, 95], [460, 155, 250, 130], [700, 210, 220, 100],
+        ]) {
+          mist.save();
+          mist.translate(x, y);
+          mist.scale(width, height);
+          const glow = mist.createRadialGradient(0, 0, 0, 0, 0, 1);
+          glow.addColorStop(0, 'rgba(205, 213, 240, 0.8)');
+          glow.addColorStop(0.45, 'rgba(197, 207, 234, 0.35)');
+          glow.addColorStop(1, 'rgba(197, 207, 234, 0)');
+          mist.fillStyle = glow;
+          mist.fillRect(-1, -1, 2, 2);
+          mist.restore();
+        }
+      }
+    }
+    const breezeStartedAt = performance.now();
     let active = true;
     let segmenter: PersonSegmenter | undefined;
     let timer: number | undefined;
@@ -239,12 +273,49 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       } else {
         ctx.drawImage(background, 0, 0, output.width, output.height);
       }
+      // Mist stays in the sky, behind the person, and is part of captured media.
+      if (skyMist && lotusSkyMistOpacity > 0) {
+        const cloudWidth = output.width * 0.95;
+        const cloudHeight = output.height * 0.20;
+        const progress = ((now - breezeStartedAt) / 240000 + 0.28) % 1;
+        const cloudX = -cloudWidth + progress * (output.width + 2 * cloudWidth);
+        ctx.save();
+        ctx.globalAlpha = lotusSkyMistOpacity;
+        ctx.drawImage(skyMist, cloudX, output.height * 0.055, cloudWidth, cloudHeight);
+        ctx.restore();
+      }
       ctx.drawImage(foreground, 0, 0);
+      // Composite over the person so the same moving leaves are captured in photos and videos.
+      if (leaves?.complete && leaves.naturalWidth) {
+        const elapsed = (now - breezeStartedAt) / 1000;
+        for (const side of [-1, 1]) {
+          const phase = elapsed * Math.PI * 2 / (side === -1 ? 5.2 : 6.1) + (side === -1 ? 0 : 1.7);
+          const sway = Math.sin(phase) * 0.065 + Math.sin(phase * 1.8) * 0.012;
+          const sprite = side === 1 && rightLeaves?.complete && rightLeaves.naturalWidth ? rightLeaves : leaves;
+          const leafHeight = output.height * (side === -1 ? 0.29 : 0.18);
+          const leafWidth = leafHeight * sprite.naturalWidth / sprite.naturalHeight;
+          ctx.save();
+          ctx.translate(side === -1 ? -24 : output.width + 24, output.height + 38);
+          // The reference cluster leans toward the right edge in its original orientation.
+          ctx.rotate(side === 1 ? sway * 0.7 : sway);
+          ctx.drawImage(sprite, side === 1 ? -leafWidth : -leafWidth * 0.1, -leafHeight, leafWidth, leafHeight);
+          ctx.restore();
+        }
+      }
+      ctx.save();
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+      ctx.shadowBlur = 14;
+      const logoHeight = 76;
+      const logoWidth = logoHeight * logo.naturalWidth / logo.naturalHeight;
+      ctx.drawImage(logo, 34, output.height - logoHeight - 34, logoWidth, logoHeight);
+      ctx.restore();
     }
 
     async function startSegmentation() {
       try {
-        await background.decode();
+        await Promise.all([background.decode(), logo.decode()]);
+        // A missing decorative asset must not stop the camera experience.
+        await Promise.all([leaves, rightLeaves].map(sprite => sprite?.decode().catch(() => undefined)));
         if (!active) return;
         const model = await loadPersonSegmenter();
         if (!active) {
@@ -265,7 +336,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       window.clearInterval(timer);
       segmenter?.close();
     };
-  }, [permission, facing, switching, image]);
+  }, [permission, facing, switching, image, slug]);
 
   function startBackdropAudio() {
     const video = backdropVideo.current;
@@ -483,6 +554,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
         />
+        {!ready && <img src={arLogo} alt="" className="pointer-events-none absolute bottom-[1.77%] left-[3.15%] z-10 h-[3.96%] w-auto drop-shadow-[0_0_5px_rgba(255,255,255,0.75)]" />}
         <video ref={camera} muted playsInline className="sr-only" aria-hidden="true" />
         <canvas ref={canvas} width={1080} height={1920} className={`absolute inset-0 h-full w-full ${ready ? '' : 'invisible'}`} aria-hidden="true" />
         {reviewingVideo && (
@@ -592,3 +664,7 @@ function App() {
 }
 
 export default App;
+
+
+
+
