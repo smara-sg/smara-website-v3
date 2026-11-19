@@ -14,10 +14,10 @@ export default function Navigation() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 lg:h-14 lg:px-6">
         <NavLink
           to="/"
-          className="flex items-center text-[15px] font-medium tracking-wide text-ink"
+          className="flex min-h-12 items-center text-lg font-medium tracking-wide text-ink lg:text-[15px]"
           onClick={closeMenu}
         >
           <OptimizedImage
@@ -29,7 +29,7 @@ export default function Navigation() {
           SMARA
         </NavLink>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-8 lg:flex">
           <NavLink to="/gallery" className={linkClass} onClick={closeMenu}>Artwork</NavLink>
           <NavLink to="/events" className={linkClass} onClick={closeMenu}>Events</NavLink>
           <NavLink to="/ar-experience" className={linkClass} onClick={closeMenu}>Augment Reality (AR) Experience</NavLink>
@@ -38,7 +38,7 @@ export default function Navigation() {
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-ink md:hidden"
+          className="inline-flex h-12 w-12 items-center justify-center rounded-full text-ink lg:hidden"
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setIsMenuOpen((open) => !open)}
@@ -48,7 +48,7 @@ export default function Navigation() {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-black/5 bg-white/95 px-6 py-4 md:hidden">
+        <div className="border-t border-black/5 bg-white/95 px-6 py-4 lg:hidden">
           <div className="flex flex-col gap-1">
             <NavLink to="/gallery" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Artwork</NavLink>
             <NavLink to="/events" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Events</NavLink>
@@ -60,3 +60,4 @@ export default function Navigation() {
     </nav>
   );
 }
+

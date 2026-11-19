@@ -126,12 +126,12 @@ const GalleryPage = () => {
               <button
                 key={image.src}
                 onClick={() => setCurrentCarouselIndex(index)}
-                className={`h-1.5 rounded-full transition-all ${
-                  currentCarouselIndex === index ? 'w-6 bg-ink' : 'w-1.5 bg-line'
-                }`}
+                className="inline-flex h-11 w-11 items-center justify-center"
                 aria-label={`View image ${index + 1}`}
                 aria-current={currentCarouselIndex === index ? 'true' : undefined}
-              />
+              >
+                <span aria-hidden="true" className={`h-1.5 rounded-full transition-all ${currentCarouselIndex === index ? 'w-6 bg-ink' : 'w-1.5 bg-line'}`} />
+              </button>
             ))}
           </div>
         </div>
@@ -179,11 +179,11 @@ const GalleryPage = () => {
                   <button
                     key={artwork.id}
                     onClick={() => goToArtwork(index)}
-                    className={`h-1.5 rounded-full ${
-                      currentArtworkIndex === index ? 'w-6 bg-white' : 'w-1.5 bg-white/60'
-                    }`}
+                    className="inline-flex h-11 w-11 items-center justify-center"
                     aria-label={artwork.title}
-                  />
+                  >
+                    <span aria-hidden="true" className={`h-1.5 rounded-full ${currentArtworkIndex === index ? 'w-6 bg-white' : 'w-1.5 bg-white/60'}`} />
+                  </button>
                 ))}
               </div>
             </div>
@@ -224,3 +224,4 @@ const GalleryPage = () => {
 };
 
 export default GalleryPage;
+

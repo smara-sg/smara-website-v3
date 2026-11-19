@@ -120,10 +120,11 @@ const EventsPage = () => {
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(prev => ({ ...prev, [event.id]: index }))}
-                        className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                          (currentImageIndex[event.id] ?? 0) === index ? 'bg-white' : 'bg-white/50'
-                        }`}
-                      />
+                        aria-label={`View image ${index + 1} for ${event.title}`}
+                        className="inline-flex h-11 w-11 items-center justify-center"
+                      >
+                        <span aria-hidden="true" className={`h-2 w-2 rounded-full transition-colors ${(currentImageIndex[event.id] ?? 0) === index ? 'bg-white' : 'bg-white/50'}`} />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -162,4 +163,5 @@ const EventsPage = () => {
 };
 
 export default EventsPage;
+
 

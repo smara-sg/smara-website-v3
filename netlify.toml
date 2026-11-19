@@ -1,4 +1,5 @@
 [build]
+ignore = "node ./scripts/ignore-unpublished-build.mjs"
 functions = "netlify/functions"
 command = "npx vite build"
 publish = "dist"
@@ -36,3 +37,4 @@ node_bundler = "esbuild"
   from = "/ar-experience"
   to = "/ar-experience/index.html"
   status = 200
+
