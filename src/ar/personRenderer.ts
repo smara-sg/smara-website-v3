@@ -1,4 +1,5 @@
-import { inferenceInterval, updatePersonAlpha } from './mask';
+import { inferenceInterval, updatePersonAlpha, validateConfidenceMask } from './mask';
+import { needsMobileMaskCompatibility } from './compatibility';
 
 const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21';
 const personModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
@@ -19,6 +20,7 @@ export function startPersonRenderer(
   isPaused: () => boolean = () => false,
   onMetrics?: (metrics: { durationMs: number; mode: 'worker' | 'fallback'; intervalMs: number }) => void,
 ) {
+  const mobileCompatibility = needsMobileMaskCompatibility(navigator);
   const fg = foreground.getContext('2d');
   const mask = document.createElement('canvas');
   const maskContext = mask.getContext('2d');
@@ -36,11 +38,13 @@ export function startPersonRenderer(
   let lastSubmitted = -Infinity;
   let interval = 1000 / 20;
   const extraction = document.createElement('canvas');
-  let directVideoBitmap = true;
+  // Normalize mobile camera rotation/cropping through Canvas before transferring frames.
+  let directVideoBitmap = !mobileCompatibility;
 
   function finishFrame(frame: ImageBitmap, confidence: Float32Array, width: number, height: number, duration: number) {
     if (!active || !fg || !maskContext) { frame.close(); return; }
     try {
+      validateConfidenceMask(confidence, width, height);
       const resized = !pixels || pixels.width !== width || pixels.height !== height;
       if (resized) {
         mask.width = width;
@@ -55,6 +59,9 @@ export function startPersonRenderer(
         foreground.width = frame.width;
         foreground.height = frame.height;
       }
+      fg.setTransform(1, 0, 0, 1, 0, 0);
+      fg.globalCompositeOperation = 'source-over';
+      fg.filter = 'none';
       fg.clearRect(0, 0, foreground.width, foreground.height);
       fg.save();
       if (mirrored) { fg.translate(foreground.width, 0); fg.scale(-1, 1); }
@@ -62,8 +69,8 @@ export function startPersonRenderer(
       fg.imageSmoothingQuality = 'high';
       fg.drawImage(frame, 0, 0);
       fg.globalCompositeOperation = 'destination-in';
-      // Bilinear upsampling plus a tiny feather softens coarse edges without eroding hair.
-      fg.filter = 'blur(1px)';
+      // The matte already has soft alpha edges. Avoid filtered destination-in draws:
+      // mobile Canvas/GPU implementations can corrupt that intermediate texture.
       fg.drawImage(mask, 0, 0, foreground.width, foreground.height);
       fg.restore();
       interval = interval * 0.75 + inferenceInterval(duration) * 0.25;
@@ -90,9 +97,8 @@ export function startPersonRenderer(
         baseOptions: { modelAssetPath: personModel, delegate },
         runningMode: 'VIDEO', outputConfidenceMasks: true, outputCategoryMask: false,
       });
-      let model: Segmenter;
-      try { model = await create('GPU'); }
-      catch { model = await create('CPU'); }
+      // A failed worker must not retry the same GPU path on the main thread.
+      const model: Segmenter = await create('CPU');
       if (!active) { model.close(); return; }
       fallback = model;
       schedule();
@@ -168,15 +174,18 @@ export function startPersonRenderer(
     void startFallback();
   } else {
     try {
-      worker = new Worker('/ar-segmentation-worker.js');
+      worker = new Worker('/ar-segmentation-worker.js?v=mobile-mask-1');
       worker.onmessage = ({ data }) => {
         if (!active) { data.frame?.close(); return; }
         if (data.type === 'ready') { clearTimeout(watchdog); schedule(); }
-        else if (data.type === 'result') finishFrame(data.frame, new Float32Array(data.confidence), data.width, data.height, data.duration);
+        else if (data.type === 'result') {
+          try { finishFrame(data.frame, new Float32Array(data.confidence), data.width, data.height, data.duration); }
+          catch { void startFallback(); }
+        }
         else if (data.type === 'error') void startFallback();
       };
       worker.onerror = () => { void startFallback(); };
-      worker.postMessage({ type: 'init', assets: visionAssets, model: personModel });
+      worker.postMessage({ type: 'init', assets: visionAssets, model: personModel, delegate: mobileCompatibility ? 'CPU' : 'GPU' });
       watchdog = setTimeout(() => { void startFallback(); }, 30000);
     } catch { void startFallback(); }
   }

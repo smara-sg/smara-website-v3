@@ -20,3 +20,14 @@ export function updatePersonAlpha(
 export function inferenceInterval(durationMs: number) {
   return Math.max(1000 / 24, Math.min(180, durationMs * 1.15));
 }
+
+/** Never composite malformed GPU readback as an alpha matte. */
+export function validateConfidenceMask(background: Float32Array, width: number, height: number) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0
+    || background.length !== width * height) throw new Error('Invalid mask dimensions');
+  for (const value of background) {
+    if (!Number.isFinite(value) || value < -0.001 || value > 1.001) {
+      throw new Error('Invalid mask confidence');
+    }
+  }
+}
