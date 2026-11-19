@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { startPersonRenderer } from './ar/personRenderer';
+import LegacyMandalaExperience from './ar/LegacyMandalaExperience';
 import { needsMobileMaskCompatibility } from './ar/compatibility';
 import { personPlacement } from './ar/framing';
 import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
@@ -38,13 +39,14 @@ function Home() {
   );
 }
 
-const arSamples = [
+type ArSample = { name: string; slug: string; image: string; video: string; legacy?: boolean };
+
+const arSamples: ArSample[] = [
   { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-seamless.mp4' },
   { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-seamless.mp4' },
   { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-seamless.mp4' },
+  { name: 'Mandala', slug: 'mandala', image: '/images/ar-mandala-original.jpg', video: '/images/ar-mandala-original.mp4', legacy: true },
 ];
-
-type ArSample = (typeof arSamples)[number];
 
 const arLogo = '/images/smara-ar-logo.png';
 // Set to zero to remove the optional, very faint lily-pond sky movement.
@@ -577,7 +579,7 @@ function ArExperiencePage() {
         <h1 className="display">Augment Reality (AR) Experience</h1>
         <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
           {arSamples.map((sample) => (
-            <li key={sample.slug} className="mx-auto w-full max-w-[22rem] min-w-0">
+            <li key={sample.slug} className={`mx-auto w-full max-w-[22rem] min-w-0 ${sample.legacy ? 'col-span-full' : ''}`}>
               <div className="relative">
               <img
                 src={sample.image}
@@ -627,7 +629,9 @@ function StandaloneCameraPage() {
     <main className="min-h-[100dvh] bg-black text-white">
       <h1 className="sr-only">SMARA AR camera</h1>
       {clientReady && sample
-        ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
+        ? sample.legacy
+          ? <LegacyMandalaExperience key={sample.slug} image={sample.image} video={sample.video} onClose={() => navigate('/ar-experience/')} />
+          : <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
         : <p role="status" className="p-6 text-center">Opening your AR experience…</p>}
     </main>
   );

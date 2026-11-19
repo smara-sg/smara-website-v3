@@ -1,4 +1,4 @@
-export const filterSlugs = ['moonlit-lotus-pond', 'misty-mountain', 'tropical-beach'] as const;
+export const filterSlugs = ['moonlit-lotus-pond', 'misty-mountain', 'tropical-beach', 'mandala'] as const;
 
 export function filterPath(slug: string) {
   if (!filterSlugs.some(value => value === slug)) throw new Error('Unknown AR filter');
