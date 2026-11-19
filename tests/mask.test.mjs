@@ -67,3 +67,16 @@ test('software alpha preserves RGB and aligns both mirrored and rear camera mask
   assert.deepEqual([image[3], image[7], image[11], image[15]], [0, 64, 191, 255]);
   assert.throws(() => applyPersonMatte(image, 2, 2, matte, 2, 2, false));
 });
+
+test('single-output selfie masks preserve category zero people and remove category 255 background', async () => {
+  const { backgroundFromCategories } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  assert.deepEqual([...backgroundFromCategories(new Uint8Array([0, 0, 255, 255]), 4, 1, true)], [0, .25, .75, 1]);
+  const person = backgroundFromCategories(new Uint8Array(9), 3, 3, true);
+  const rgba = new Uint8ClampedArray(36);
+  updatePersonAlpha(person, new Float32Array(9), rgba, true);
+  assert.equal(rgba[3], 255);
+  const background = backgroundFromCategories(new Uint8Array(9).fill(255), 3, 3, true);
+  updatePersonAlpha(background, new Float32Array(9), rgba, true);
+  assert.equal(rgba[3], 0);
+  assert.throws(() => backgroundFromCategories(new Uint8Array([1]), 1, 1, true));
+});

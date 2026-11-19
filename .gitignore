@@ -27,3 +27,5 @@ yarn-error.log*
 # Local visual-test fixtures are generated from existing photos and are not release assets.
 /tests/fixtures/
 /tests/ar-fixture.html
+/tests/ar-model-comparison.html
+/tests/ar-ui-fixture.html

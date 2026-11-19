@@ -10,9 +10,9 @@ export function cameraFrameGeometry(sourceWidth: number, sourceHeight: number, m
   };
 }
 
-/** Fit the cutout without stretching or cropping, leaving a little mobile headroom. */
-export function personPlacement(sourceWidth: number, sourceHeight: number, width: number, height: number, mobile: boolean) {
-  const scale = Math.min(width / sourceWidth, height / sourceHeight) * (mobile ? 0.9 : 1);
+/** Fit preserves the camera view; Fill explicitly fills the portrait with a center crop. */
+export function personPlacement(sourceWidth: number, sourceHeight: number, width: number, height: number, mobile: boolean, framing: 'fit' | 'fill' = 'fit') {
+  const scale = (mobile && framing === 'fill' ? Math.max : Math.min)(width / sourceWidth, height / sourceHeight);
   const drawWidth = sourceWidth * scale;
   const drawHeight = sourceHeight * scale;
   return { x: (width - drawWidth) / 2, y: height - drawHeight, width: drawWidth, height: drawHeight };

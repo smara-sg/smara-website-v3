@@ -19,13 +19,14 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--seo:start--
 
 const { render } = await import(pathToFileURL(serverEntry).href)
 
-const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience']
+const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/ar-camera']
 const markers = {
   '/': 'Self-Gaze Meditation Augmented Reality Art',
   '/gallery': 'SMARA Artworks For Sale',
   '/events': 'SMARA Events',
   '/about': 'About SMARA',
   '/ar-experience': 'Augment Reality (AR) Experience',
+  '/ar-camera': 'SMARA AR camera',
   '/art-cards': 'Transform Art into Interactive Meditation',
 }
 
@@ -113,3 +114,4 @@ if (!notFoundHtml.includes('name="robots" content="noindex"')) {
 }
 fs.writeFileSync(path.join(distDir, '404.html'), notFoundHtml)
 console.log(`prerendered 404 -> 404.html (${notFoundHtml.length} bytes)`)
+

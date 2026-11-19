@@ -17,9 +17,10 @@ test('desktop acceleration remains available, including Windows touch laptops', 
   }
 });
 
-test('Android Edge uses byte masks while Chrome keeps its working confidence masks', async () => {
-  const { needsByteMaskCompatibility } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
-  assert.equal(needsByteMaskCompatibility({ userAgent: 'Mozilla/5.0 (Linux; Android 15) Chrome/140 Mobile Safari/537.36 EdgA/140' }), true);
-  assert.equal(needsByteMaskCompatibility({ userAgent: 'Mozilla/5.0 (Linux; Android 15) Chrome/140 Mobile Safari/537.36' }), false);
-  assert.equal(needsByteMaskCompatibility({ userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/140 Edg/140' }), false);
+test('device detection reads non-enumerable Navigator properties directly', () => {
+  const prototype = {};
+  Object.defineProperty(prototype, 'userAgent', { value: 'Mozilla/5.0 (Linux; Android 15) EdgA/140' });
+  Object.defineProperty(prototype, 'maxTouchPoints', { value: 5 });
+  const device = Object.create(prototype);
+  assert.equal(needsMobileMaskCompatibility(device), true);
 });

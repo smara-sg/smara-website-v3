@@ -1,9 +1,10 @@
 import { inferenceInterval, updatePersonAlpha, validateConfidenceMask, backgroundFromCategories, applyPersonMatte } from './mask';
-import { needsMobileMaskCompatibility, needsByteMaskCompatibility } from './compatibility';
+import { needsMobileMaskCompatibility } from './compatibility';
 import { cameraFrameGeometry } from './framing';
 
 const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21';
-const personModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
+const desktopPersonModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
+const mobilePersonModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite';
 
 type Mask = { width: number; height: number; getAsFloat32Array(): Float32Array };
 type CategoryMask = { width: number; height: number; getAsUint8Array(): Uint8Array };
@@ -24,7 +25,8 @@ export function startPersonRenderer(
   device: Pick<Navigator, 'userAgent' | 'maxTouchPoints'> = navigator,
 ) {
   const mobileCompatibility = needsMobileMaskCompatibility(device);
-  const byteMaskCompatibility = needsByteMaskCompatibility(device);
+  const byteMaskCompatibility = mobileCompatibility;
+  const personModel = mobileCompatibility ? mobilePersonModel : desktopPersonModel;
   const fg = foreground.getContext('2d', { willReadFrequently: mobileCompatibility });
   const mask = document.createElement('canvas');
   const maskContext = mask.getContext('2d');
@@ -148,7 +150,7 @@ export function startPersonRenderer(
         fallback.segmentForVideo(cameraFrame, timestamp, ({ confidenceMasks, categoryMask }) => {
           if (byteMaskCompatibility) {
             if (!categoryMask) throw new Error('No category mask');
-            result.value = { confidence: backgroundFromCategories(categoryMask.getAsUint8Array(), categoryMask.width, categoryMask.height), width: categoryMask.width, height: categoryMask.height };
+            result.value = { confidence: backgroundFromCategories(categoryMask.getAsUint8Array(), categoryMask.width, categoryMask.height, mobileCompatibility), width: categoryMask.width, height: categoryMask.height };
             return;
           }
           const background = confidenceMasks?.[0];
@@ -184,14 +186,14 @@ export function startPersonRenderer(
     void startFallback();
   } else {
     try {
-      worker = new Worker('/ar-segmentation-worker.js?v=mobile-category-2');
+      worker = new Worker('/ar-segmentation-worker.js?v=mobile-person-3');
       worker.onmessage = ({ data }) => {
         if (!active) { data.frame?.close(); return; }
         if (data.type === 'ready') { clearTimeout(watchdog); schedule(); }
         else if (data.type === 'result') {
           try {
             const confidence = data.categories
-              ? backgroundFromCategories(new Uint8Array(data.categories), data.width, data.height)
+              ? backgroundFromCategories(new Uint8Array(data.categories), data.width, data.height, mobileCompatibility)
               : new Float32Array(data.confidence);
             finishFrame(data.frame, confidence, data.width, data.height, data.duration);
           }

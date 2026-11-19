@@ -2,7 +2,7 @@ export const filterSlugs = ['moonlit-lotus-pond', 'misty-mountain', 'tropical-be
 
 export function filterPath(slug: string) {
   if (!filterSlugs.some(value => value === slug)) throw new Error('Unknown AR filter');
-  return '/ar-experience/?filter=' + encodeURIComponent(slug);
+  return '/ar-camera/?filter=' + encodeURIComponent(slug);
 }
 
 export function publicFilterUrl(slug: string) {

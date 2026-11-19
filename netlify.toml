@@ -38,3 +38,8 @@ node_bundler = "esbuild"
   to = "/ar-experience/index.html"
   status = 200
 
+[[redirects]]
+  from = "/ar-camera"
+  to = "/ar-camera/index.html"
+  status = 200
+

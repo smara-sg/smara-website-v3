@@ -13,7 +13,7 @@ test('mobile preserves all four sensor edges in portrait, landscape and square f
     assert.equal(frame.cropWidth, width); assert.equal(frame.cropHeight, height);
     assert.ok(Math.abs(frame.width / frame.height - width / height) < .005);
     const fit = personPlacement(frame.width, frame.height, 1080, 1920, true);
-    assert.ok(fit.x >= 0 && fit.y > 0);
+    assert.ok(fit.x >= 0 && fit.y >= 0);
     assert.ok(fit.x + fit.width <= 1080 && fit.y + fit.height <= 1920);
     assert.ok(Math.abs(fit.width / fit.height - frame.width / frame.height) < .00001);
   }
@@ -24,4 +24,15 @@ test('desktop retains its centered portrait camera crop', () => {
   assert.equal(frame.cropWidth, 405);
   assert.ok(frame.x > 400);
   assert.equal(frame.y, 0);
+});
+
+test('Fit uses the full view without shrinking, while Fill covers the entire portrait', () => {
+  const portrait = personPlacement(720, 1280, 1080, 1920, true);
+  assert.deepEqual(portrait, { x: 0, y: 0, width: 1080, height: 1920 });
+  const fit = personPlacement(640, 480, 1080, 1920, true, 'fit');
+  const fill = personPlacement(640, 480, 1080, 1920, true, 'fill');
+  assert.equal(fit.width, 1080);
+  assert.equal(fill.height, 1920);
+  assert.ok(fill.x < 0 && fill.width > 1080);
+  assert.equal(fill.width / fill.height, 640 / 480);
 });
