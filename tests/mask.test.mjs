@@ -30,6 +30,8 @@ test('adaptive scheduling limits inference demand on both fast and slow devices'
   assert.equal(inferenceInterval(5), 1000 / 24);
   assert.ok(inferenceInterval(80) > 80);
   assert.equal(inferenceInterval(1000), 180);
+  assert.equal(inferenceInterval(180, false), 240);
+  assert.equal(inferenceInterval(300, false), 360);
 });
 
 test('rejects malformed masks before they can corrupt the composite', async () => {
@@ -39,4 +41,29 @@ test('rejects malformed masks before they can corrupt the composite', async () =
     assert.throws(() => validateConfidenceMask(new Float32Array(values), 2, 2));
   }
   assert.throws(() => validateConfidenceMask(new Float32Array(4), 2.5, 2));
+});
+
+test('byte masks keep hair, face, skin, clothes and accessories, removing only background', async () => {
+  const { backgroundFromCategories } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  for (const category of [0, 1, 2, 3, 4, 5]) {
+    assert.deepEqual([...backgroundFromCategories(new Uint8Array(9).fill(category), 3, 3)], Array(9).fill(category === 0 ? 1 : 0));
+  }
+  const edge = backgroundFromCategories(new Uint8Array([0, 0, 1, 1]), 4, 1);
+  assert.deepEqual([...edge], [1, .75, .25, 0]);
+  assert.throws(() => backgroundFromCategories(new Uint8Array([0, 255]), 2, 1));
+  assert.throws(() => backgroundFromCategories(new Uint8Array([0]), 2, 1));
+});
+
+test('software alpha preserves RGB and aligns both mirrored and rear camera masks', async () => {
+  const { applyPersonMatte } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  const matte = new Uint8ClampedArray([0, 0, 0, 0, 0, 0, 0, 255]);
+  for (const mirrored of [false, true]) {
+    const image = new Uint8ClampedArray([12, 34, 56, 255, 78, 90, 12, 255]);
+    applyPersonMatte(image, 2, 1, matte, 2, 1, mirrored);
+    assert.deepEqual([...image], [12, 34, 56, mirrored ? 255 : 0, 78, 90, 12, mirrored ? 0 : 255]);
+  }
+  const image = new Uint8ClampedArray(16).fill(255);
+  applyPersonMatte(image, 4, 1, matte, 2, 1, false);
+  assert.deepEqual([image[3], image[7], image[11], image[15]], [0, 64, 191, 255]);
+  assert.throws(() => applyPersonMatte(image, 2, 2, matte, 2, 2, false));
 });
