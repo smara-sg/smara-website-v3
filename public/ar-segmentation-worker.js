@@ -2,18 +2,20 @@
 let segmenter;
 let inferenceCanvas;
 let inferenceContext;
+let categoryOutput = false;
 
 self.onmessage = async ({ data }) => {
   if (data.type === 'init') {
     try {
+      categoryOutput = data.categoryMask === true;
       const { FilesetResolver, ImageSegmenter } = await import(`${data.assets}/vision_bundle.mjs`);
       const files = await FilesetResolver.forVisionTasks(`${data.assets}/wasm`);
       const create = (delegate) => ImageSegmenter.createFromOptions(files, {
         baseOptions: { modelAssetPath: data.model, delegate },
         canvas: new OffscreenCanvas(256, 256),
         runningMode: 'VIDEO',
-        outputConfidenceMasks: true,
-        outputCategoryMask: false,
+        outputConfidenceMasks: !categoryOutput,
+        outputCategoryMask: categoryOutput,
       });
       // Mobile float texture readback can succeed but return a visibly corrupt matte.
       // Keep inference off the UI thread, with CPU masks on phones and tablets.
@@ -42,7 +44,13 @@ self.onmessage = async ({ data }) => {
     if (inferenceCanvas.height !== height) inferenceCanvas.height = height;
     inferenceContext.drawImage(frame, 0, 0, 256, height);
     let result;
-    segmenter.segmentForVideo(inferenceCanvas, data.timestamp, ({ confidenceMasks }) => {
+    segmenter.segmentForVideo(inferenceCanvas, data.timestamp, ({ confidenceMasks, categoryMask }) => {
+      if (categoryOutput) {
+        if (!categoryMask) throw new Error('No category mask');
+        const categories = categoryMask.getAsUint8Array().slice();
+        result = { type: 'result', frame, categories: categories.buffer, width: categoryMask.width, height: categoryMask.height, duration: performance.now() - started };
+        return;
+      }
       const background = confidenceMasks?.[0];
       if (!background) throw new Error('No background confidence');
       // MediaPipe only guarantees mask memory during this callback; transfer our own copy.
@@ -54,7 +62,7 @@ self.onmessage = async ({ data }) => {
       };
     });
     if (!result) throw new Error('No result');
-    self.postMessage(result, [frame, result.confidence]);
+    self.postMessage(result, [frame, result.categories || result.confidence]);
   } catch {
     frame.close();
     self.postMessage({ type: 'error' });

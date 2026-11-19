@@ -1,12 +1,14 @@
-import { inferenceInterval, updatePersonAlpha, validateConfidenceMask } from './mask';
-import { needsMobileMaskCompatibility } from './compatibility';
+import { inferenceInterval, updatePersonAlpha, validateConfidenceMask, backgroundFromCategories, applyPersonMatte } from './mask';
+import { needsMobileMaskCompatibility, needsByteMaskCompatibility } from './compatibility';
+import { cameraFrameGeometry } from './framing';
 
 const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21';
 const personModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
 
 type Mask = { width: number; height: number; getAsFloat32Array(): Float32Array };
+type CategoryMask = { width: number; height: number; getAsUint8Array(): Uint8Array };
 type Segmenter = {
-  segmentForVideo(frame: ImageBitmap, timestamp: number, callback: (result: { confidenceMasks?: Mask[] }) => void): void;
+  segmentForVideo(frame: ImageBitmap, timestamp: number, callback: (result: { confidenceMasks?: Mask[]; categoryMask?: CategoryMask }) => void): void;
   close(): void;
 };
 
@@ -18,10 +20,12 @@ export function startPersonRenderer(
   onReady: () => void,
   onError: () => void,
   isPaused: () => boolean = () => false,
-  onMetrics?: (metrics: { durationMs: number; mode: 'worker' | 'fallback'; intervalMs: number }) => void,
+  onMetrics?: (metrics: { durationMs: number; mode: 'worker' | 'fallback'; intervalMs: number; maskFormat: 'category' | 'confidence' }) => void,
+  device: Pick<Navigator, 'userAgent' | 'maxTouchPoints'> = navigator,
 ) {
-  const mobileCompatibility = needsMobileMaskCompatibility(navigator);
-  const fg = foreground.getContext('2d');
+  const mobileCompatibility = needsMobileMaskCompatibility(device);
+  const byteMaskCompatibility = needsByteMaskCompatibility(device);
+  const fg = foreground.getContext('2d', { willReadFrequently: mobileCompatibility });
   const mask = document.createElement('canvas');
   const maskContext = mask.getContext('2d');
   let pixels: ImageData | undefined;
@@ -53,7 +57,7 @@ export function startPersonRenderer(
         previous = new Float32Array(width * height);
       }
       updatePersonAlpha(confidence, previous!, pixels!.data, !ready || resized);
-      maskContext.putImageData(pixels!, 0, 0);
+      if (!byteMaskCompatibility) maskContext.putImageData(pixels!, 0, 0);
       // Work at camera detail, not 1080x1920, then upscale once in the final composition.
       if (foreground.width !== frame.width || foreground.height !== frame.height) {
         foreground.width = frame.width;
@@ -68,13 +72,19 @@ export function startPersonRenderer(
       fg.imageSmoothingEnabled = true;
       fg.imageSmoothingQuality = 'high';
       fg.drawImage(frame, 0, 0);
-      fg.globalCompositeOperation = 'destination-in';
-      // The matte already has soft alpha edges. Avoid filtered destination-in draws:
-      // mobile Canvas/GPU implementations can corrupt that intermediate texture.
-      fg.drawImage(mask, 0, 0, foreground.width, foreground.height);
+      if (!byteMaskCompatibility) {
+        fg.globalCompositeOperation = 'destination-in';
+        fg.drawImage(mask, 0, 0, foreground.width, foreground.height);
+      }
       fg.restore();
-      interval = interval * 0.75 + inferenceInterval(duration) * 0.25;
-      onMetrics?.({ durationMs: duration, mode: worker ? 'worker' : 'fallback', intervalMs: interval });
+      if (byteMaskCompatibility) {
+        const image = fg.getImageData(0, 0, foreground.width, foreground.height);
+        applyPersonMatte(image.data, foreground.width, foreground.height, pixels!.data, width, height, mirrored);
+        fg.putImageData(image, 0, 0);
+      }
+      interval = worker ? interval * 0.75 + inferenceInterval(duration) * 0.25
+        : inferenceInterval(duration, false);
+      onMetrics?.({ durationMs: duration, mode: worker ? 'worker' : 'fallback', intervalMs: interval, maskFormat: byteMaskCompatibility ? 'category' : 'confidence' });
       if (!ready) { ready = true; onReady(); }
     } finally {
       frame.close();
@@ -95,7 +105,7 @@ export function startPersonRenderer(
       const files = await FilesetResolver.forVisionTasks(`${visionAssets}/wasm`);
       const create = (delegate: 'GPU' | 'CPU') => ImageSegmenter.createFromOptions(files, {
         baseOptions: { modelAssetPath: personModel, delegate },
-        runningMode: 'VIDEO', outputConfidenceMasks: true, outputCategoryMask: false,
+        runningMode: 'VIDEO', outputConfidenceMasks: !byteMaskCompatibility, outputCategoryMask: byteMaskCompatibility,
       });
       // A failed worker must not retry the same GPU path on the main thread.
       const model: Segmenter = await create('CPU');
@@ -111,12 +121,7 @@ export function startPersonRenderer(
     lastVideoTime = feed.currentTime;
     let frame: ImageBitmap | undefined;
     try {
-      const cropWidth = Math.min(feed.videoWidth, feed.videoHeight * 9 / 16);
-      const cropHeight = cropWidth * 16 / 9;
-      const width = Math.max(2, Math.min(720, Math.round(cropWidth / 2) * 2));
-      const x = Math.round((feed.videoWidth - cropWidth) / 2);
-      const y = Math.round((feed.videoHeight - cropHeight) / 2);
-      const height = Math.round(width * 16 / 9);
+      const { x, y, cropWidth, cropHeight, width, height } = cameraFrameGeometry(feed.videoWidth, feed.videoHeight, mobileCompatibility);
       if (directVideoBitmap) {
         try {
           frame = await createImageBitmap(feed, x, y, Math.floor(cropWidth), Math.floor(cropHeight),
@@ -140,7 +145,12 @@ export function startPersonRenderer(
         const started = performance.now();
         const cameraFrame = frame;
         const result: { value?: { confidence: Float32Array; width: number; height: number } } = {};
-        fallback.segmentForVideo(cameraFrame, timestamp, ({ confidenceMasks }) => {
+        fallback.segmentForVideo(cameraFrame, timestamp, ({ confidenceMasks, categoryMask }) => {
+          if (byteMaskCompatibility) {
+            if (!categoryMask) throw new Error('No category mask');
+            result.value = { confidence: backgroundFromCategories(categoryMask.getAsUint8Array(), categoryMask.width, categoryMask.height), width: categoryMask.width, height: categoryMask.height };
+            return;
+          }
           const background = confidenceMasks?.[0];
           if (!background) throw new Error('No background mask');
           result.value = { confidence: background.getAsFloat32Array().slice(), width: background.width, height: background.height };
@@ -174,18 +184,23 @@ export function startPersonRenderer(
     void startFallback();
   } else {
     try {
-      worker = new Worker('/ar-segmentation-worker.js?v=mobile-mask-1');
+      worker = new Worker('/ar-segmentation-worker.js?v=mobile-category-2');
       worker.onmessage = ({ data }) => {
         if (!active) { data.frame?.close(); return; }
         if (data.type === 'ready') { clearTimeout(watchdog); schedule(); }
         else if (data.type === 'result') {
-          try { finishFrame(data.frame, new Float32Array(data.confidence), data.width, data.height, data.duration); }
-          catch { void startFallback(); }
+          try {
+            const confidence = data.categories
+              ? backgroundFromCategories(new Uint8Array(data.categories), data.width, data.height)
+              : new Float32Array(data.confidence);
+            finishFrame(data.frame, confidence, data.width, data.height, data.duration);
+          }
+          catch { data.frame?.close(); void startFallback(); }
         }
         else if (data.type === 'error') void startFallback();
       };
       worker.onerror = () => { void startFallback(); };
-      worker.postMessage({ type: 'init', assets: visionAssets, model: personModel, delegate: mobileCompatibility ? 'CPU' : 'GPU' });
+      worker.postMessage({ type: 'init', assets: visionAssets, model: personModel, delegate: mobileCompatibility ? 'CPU' : 'GPU', categoryMask: byteMaskCompatibility });
       watchdog = setTimeout(() => { void startFallback(); }, 30000);
     } catch { void startFallback(); }
   }

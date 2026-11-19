@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { startPersonRenderer } from './ar/personRenderer';
+import { needsMobileMaskCompatibility } from './ar/compatibility';
+import { personPlacement } from './ar/framing';
 import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
 import { Routes, Route, Link, useSearchParams } from 'react-router-dom';
 import FilterQrDialog from './components/FilterQrDialog';
@@ -210,7 +212,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         ctx.drawImage(skyMist, cloudX, output.height * 0.055, cloudWidth, cloudHeight);
         ctx.restore();
       }
-      ctx.drawImage(foreground, 0, 0, output.width, output.height);
+      const placement = personPlacement(foreground.width, foreground.height, output.width, output.height, needsMobileMaskCompatibility(navigator));
+      ctx.drawImage(foreground, placement.x, placement.y, placement.width, placement.height);
       // Composite over the person so the same moving leaves are captured in photos and videos.
       if (leaves?.complete && leaves.naturalWidth) {
         const elapsed = (now - breezeStartedAt) / 1000;
@@ -300,7 +303,10 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     const media = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: exact ? { exact: direction } : { ideal: direction },
-        width: { ideal: 720 }, height: { ideal: 1280 },
+        // Prefer an uncropped sensor frame on mobile; portrait fitting happens after cutout.
+        ...(needsMobileMaskCompatibility(navigator)
+          ? { width: { ideal: 1280 }, height: { ideal: 1280 }, resizeMode: { ideal: 'none' } }
+          : { width: { ideal: 720 }, height: { ideal: 1280 } }),
         frameRate: { ideal: 30, max: 30 },
       },
       audio: includeMicrophone ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : false,
