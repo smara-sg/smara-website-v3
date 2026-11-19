@@ -40,7 +40,7 @@ test('each JPEG QR decodes to its distinct public filter URL', () => {
     const decoded = jpeg.decode(compressed, { useTArray: true });
     assert.equal(jsQR(new Uint8ClampedArray(decoded.data), size, size)?.data, url);
   }
-  assert.equal(urls.size, 3);
+  assert.equal(urls.size, 4);
 });
 
 test('filter URLs reject unknown experiences instead of producing broken links', () => {
