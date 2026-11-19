@@ -15,10 +15,15 @@ self.onmessage = async ({ data }) => {
         outputConfidenceMasks: true,
         outputCategoryMask: false,
       });
-      try { segmenter = await create('GPU'); }
-      catch { segmenter = await create('CPU'); }
+      // Mobile float texture readback can succeed but return a visibly corrupt matte.
+      // Keep inference off the UI thread, with CPU masks on phones and tablets.
+      if (data.delegate === 'CPU') segmenter = await create('CPU');
+      else {
+        try { segmenter = await create('GPU'); }
+        catch { segmenter = await create('CPU'); }
+      }
       inferenceCanvas = new OffscreenCanvas(256, 456);
-      inferenceContext = inferenceCanvas.getContext('2d');
+      inferenceContext = inferenceCanvas.getContext('2d', { willReadFrequently: data.delegate === 'CPU' });
       if (!inferenceContext) throw new Error('No worker canvas');
       self.postMessage({ type: 'ready' });
     } catch {

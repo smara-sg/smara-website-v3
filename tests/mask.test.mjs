@@ -31,3 +31,12 @@ test('adaptive scheduling limits inference demand on both fast and slow devices'
   assert.ok(inferenceInterval(80) > 80);
   assert.equal(inferenceInterval(1000), 180);
 });
+
+test('rejects malformed masks before they can corrupt the composite', async () => {
+  const { validateConfidenceMask } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  assert.doesNotThrow(() => validateConfidenceMask(new Float32Array([0, 0.5, 1, 0]), 2, 2));
+  for (const values of [[0, 1], [0, NaN, 1, 0], [0, Infinity, 1, 0], [0, -0.5, 1, 0], [0, 2, 1, 0]]) {
+    assert.throws(() => validateConfidenceMask(new Float32Array(values), 2, 2));
+  }
+  assert.throws(() => validateConfidenceMask(new Float32Array(4), 2.5, 2));
+});
