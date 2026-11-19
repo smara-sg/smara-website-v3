@@ -32,6 +32,10 @@ const pages: Record<string, { title: string; description: string }> = {
     title: 'Augment Reality (AR) Experience | SMARA',
     description: 'Explore SMARA’s interactive augmented reality camera filters as they become available.',
   },
+  '/ar-camera': {
+    title: 'AR Camera | SMARA',
+    description: 'Experience SMARA artwork with your camera.',
+  },
   '/about': {
     title: 'About SMARA',
     description:
@@ -71,9 +75,10 @@ export function pageHead(pathname: string): PageHead {
     description: page.description,
     // Netlify serves directory indexes at a trailing slash (/gallery → 301 /gallery/).
     canonical: `${SITE_URL}${path === '/' ? '/' : `${path}/`}`,
-    noindex: false,
+    noindex: path === '/ar-camera',
     preloadHero: path === '/',
     image: OG_IMAGE,
     imageAlt: OG_IMAGE_ALT,
   }
 }
+

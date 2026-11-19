@@ -33,13 +33,15 @@ export function validateConfidenceMask(background: Float32Array, width: number, 
   }
 }
 
-/** Byte categories avoid float-texture readback; class zero alone is background. */
-export function backgroundFromCategories(categories: Uint8Array, width: number, height: number) {
+/** The single-output selfie model uses 0 for person and 255 for background.
+ * Multiclass uses 0 for background and 1..5 for the parts of a person. */
+export function backgroundFromCategories(categories: Uint8Array, width: number, height: number, selfie = false) {
   if (categories.length !== width * height || width <= 0 || height <= 0) throw new Error('Invalid category dimensions');
   const background = new Float32Array(categories.length);
   for (let index = 0; index < categories.length; index++) {
-    if (categories[index] > 5) throw new Error('Invalid person category');
-    background[index] = categories[index] === 0 ? 1 : 0;
+    const value = categories[index];
+    if (selfie ? value !== 0 && value !== 255 : value > 5) throw new Error('Invalid person category');
+    background[index] = (selfie ? value === 255 : value === 0) ? 1 : 0;
   }
   // A one-pixel separable feather keeps byte-mask boundaries soft, including
   // fallbacks whose output mask is already the full camera-frame resolution.

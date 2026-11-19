@@ -3,7 +3,7 @@ import { startPersonRenderer } from './ar/personRenderer';
 import { needsMobileMaskCompatibility } from './ar/compatibility';
 import { personPlacement } from './ar/framing';
 import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
-import { Routes, Route, Link, useSearchParams } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FilterQrDialog from './components/FilterQrDialog';
 import { filterPath } from './ar/filterLinks';
 import { ScrollToTop } from './utils/scrollToTop';
@@ -78,6 +78,9 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
   const [permission, setPermission] = useState<'ask' | 'loading' | 'allowed'>('ask');
   const [ready, setReady] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [framing, setFraming] = useState<'fit' | 'fill'>('fit');
+  const cameraFraming = useRef<'fit' | 'fill'>('fit');
+  useEffect(() => { cameraFraming.current = framing; }, [framing]);
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState<{ url: string; filename: string } | null>(null);
 
@@ -212,7 +215,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         ctx.drawImage(skyMist, cloudX, output.height * 0.055, cloudWidth, cloudHeight);
         ctx.restore();
       }
-      const placement = personPlacement(foreground.width, foreground.height, output.width, output.height, needsMobileMaskCompatibility(navigator));
+      const placement = personPlacement(foreground.width, foreground.height, output.width, output.height, needsMobileMaskCompatibility(navigator), cameraFraming.current);
       ctx.drawImage(foreground, placement.x, placement.y, placement.width, placement.height);
       // Composite over the person so the same moving leaves are captured in photos and videos.
       if (leaves?.complete && leaves.naturalWidth) {
@@ -504,6 +507,17 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         <button type="button" aria-label="Close experience" onClick={onClose} className={captureButtonClass + ' absolute right-2 top-2 z-10'}>
           <X size={20} aria-hidden="true" />
         </button>
+        {permission === 'allowed' && needsMobileMaskCompatibility(navigator) && (
+          <div role="group" aria-label="Camera framing" className="absolute left-1/2 top-2 z-10 flex -translate-x-1/2 rounded-full bg-black/65 p-1 text-sm">
+            {(['fit', 'fill'] as const).map(value => (
+              <button key={value} type="button" aria-pressed={framing === value} disabled={recording || switching}
+                onClick={() => setFraming(value)}
+                className={`min-h-11 whitespace-nowrap rounded-full px-3 disabled:opacity-50 ${framing === value ? 'bg-white text-black' : 'text-white'}`}>
+                {value === 'fit' ? 'Fit view' : 'Fill frame'}
+              </button>
+            ))}
+          </div>
+        )}
         {permission !== 'allowed' && (
           <div className="absolute inset-0 grid place-items-center bg-black/35 p-4 text-center">
             <div className="max-w-xs rounded-2xl bg-black/80 p-5 text-base leading-relaxed">
@@ -549,20 +563,14 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
 }
 
 function ArExperiencePage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [clientReady, setClientReady] = useState(false);
   useEffect(() => { setClientReady(true); }, []);
-  // Prerendered HTML has no query-specific dialog. Open it after hydration.
+  // Resolve legacy query links after hydration, preserving the static gallery HTML.
   const selectedSample = clientReady ? arSamples.find(sample => sample.slug === searchParams.get('filter')) ?? null : null;
   const [qrSample, setQrSample] = useState<ArSample | null>(null);
-  function selectSample(sample: ArSample | null) {
-    setSearchParams(previous => {
-      const next = new URLSearchParams(previous);
-      if (sample) next.set('filter', sample.slug);
-      else next.delete('filter');
-      return next;
-    }, { replace: !sample });
-  }
+  // Keep previously shared and printed QR URLs working.
+  if (selectedSample) return <Navigate to={filterPath(selectedSample.slug)} replace />;
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
@@ -579,19 +587,19 @@ function ArExperiencePage() {
                 className="block h-auto w-full rounded-2xl sm:rounded-3xl"
               />
               <div className="absolute inset-0 grid place-items-center p-1.5 sm:p-3">
-                <button
-                  type="button"
-                  onClick={() => selectSample(sample)}
-                  aria-label={`click me to experience ${sample.name}`}
+                <a
+                  href={filterPath(sample.slug)}
+                  target="_blank" rel="noopener noreferrer"
+                  aria-label={`click me to experience ${sample.name} (opens in a new tab)`}
                   className="flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-lg"
                 >
                   <Camera size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
                   <span>click me to experience</span>
-                </button>
+                </a>
               </div>
               </div>
               <div className="mt-3 flex items-center justify-center gap-5 text-base text-mute">
-                <Link to={filterPath(sample.slug)} aria-label={`Share ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
+                <Link to={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`Share ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
                   <Link2 size={18} strokeWidth={1.5} aria-hidden="true" />share
                 </Link>
                 <button type="button" onClick={() => setQrSample(sample)} aria-label={`QR code for ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
@@ -602,24 +610,43 @@ function ArExperiencePage() {
           ))}
         </ul>
         {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
-        {selectedSample && <CameraExperience key={selectedSample.slug} sample={selectedSample} onClose={() => selectSample(null)} />}
       </main>
       <Footer />
     </div>
   );
 }
 
+function StandaloneCameraPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => { setClientReady(true); }, []);
+  const sample = arSamples.find(value => value.slug === searchParams.get('filter'));
+  if (clientReady && !sample) return <Navigate to="/ar-experience/" replace />;
+  return (
+    <main className="min-h-[100dvh] bg-black text-white">
+      <h1 className="sr-only">SMARA AR camera</h1>
+      {clientReady && sample
+        ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
+        : <p role="status" className="p-6 text-center">Opening your AR experience…</p>}
+    </main>
+  );
+}
+
 function App() {
+  const { pathname } = useLocation();
+  const cameraPage = pathname.replace(/\/$/, '') === '/ar-camera';
   return (
     <div className="min-h-screen">
       <PageSeo />
-      <Navigation />
+      {!cameraPage && <Navigation />}
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/ar-experience" element={<ArExperiencePage />} />
+        <Route path="/ar-camera" element={<StandaloneCameraPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/art-cards" element={<ArtCardsPage />} />
         <Route path="*" element={<NotFoundPage />} />

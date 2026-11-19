@@ -23,6 +23,7 @@ test('each JPEG QR decodes to its distinct public filter URL', () => {
     const url = publicFilterUrl(slug);
     urls.add(url);
     assert.equal(new URL(url).searchParams.get('filter'), slug);
+    assert.equal(new URL(url).pathname, '/ar-camera/');
     assert.equal(new URL(url).origin, 'https://smara.online');
     const matrix = createQrMatrix(url);
     const scale = 8, border = 4;
