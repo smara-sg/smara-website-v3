@@ -23,3 +23,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Local visual-test fixtures are generated from existing photos and are not release assets.
+/tests/fixtures/
+/tests/ar-fixture.html

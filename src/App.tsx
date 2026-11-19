@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Download, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
-import { Routes, Route } from 'react-router-dom';
+import { startPersonRenderer } from './ar/personRenderer';
+import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
+import { Routes, Route, Link, useSearchParams } from 'react-router-dom';
+import FilterQrDialog from './components/FilterQrDialog';
+import { filterPath } from './ar/filterLinks';
 import { ScrollToTop } from './utils/scrollToTop';
 import Navigation from './components/Navigation';
 import HeroSection from './components/HeroSection';
@@ -46,30 +49,7 @@ const arLogo = '/images/smara-ar-logo.png';
 const lotusSkyMistOpacity = 0.055;
 const maxRecordingSeconds = 60;
 
-const captureButtonClass = 'grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
-
-const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21';
-const personModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
-
-type PersonSegmenter = {
-  segmentForVideo(
-    frame: HTMLVideoElement,
-    timestamp: number,
-    callback: (result: { confidenceMasks?: { width: number; height: number; getAsFloat32Array(): Float32Array }[] }) => void,
-  ): void;
-  close(): void;
-};
-
-async function loadPersonSegmenter(): Promise<PersonSegmenter> {
-  const { FilesetResolver, ImageSegmenter } = await import(/* @vite-ignore */ `${visionAssets}/vision_bundle.mjs`);
-  const files = await FilesetResolver.forVisionTasks(`${visionAssets}/wasm`);
-  return ImageSegmenter.createFromOptions(files, {
-    baseOptions: { modelAssetPath: personModel, delegate: 'CPU' },
-    runningMode: 'VIDEO',
-    outputConfidenceMasks: true,
-    outputCategoryMask: false,
-  });
-}
+const captureButtonClass = 'grid h-12 w-12 shrink-0 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
 function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () => void }) {
   const { name, slug, image, video } = sample;
@@ -89,6 +69,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
   const downloadUrl = useRef('');
   const open = useRef(false);
   const recordingStarted = useRef(0);
+  const reviewing = useRef(false);
   const [seconds, setSeconds] = useState(0);
   const [facing, setFacing] = useState<'user' | 'environment'>('user');
   const [switching, setSwitching] = useState(false);
@@ -147,12 +128,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     if (!ctx || !output || !feed) return;
 
     const foreground = document.createElement('canvas');
-    foreground.width = output.width;
-    foreground.height = output.height;
-    const fg = foreground.getContext('2d');
-    const mask = document.createElement('canvas');
-    const maskContext = mask.getContext('2d');
-    if (!fg || !maskContext) return;
+    foreground.width = 720;
+    foreground.height = 1280;
 
     const background = new Image();
     background.src = image;
@@ -188,16 +165,15 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     }
     const breezeStartedAt = performance.now();
     let active = true;
-    let segmenter: PersonSegmenter | undefined;
-    let timer: number | undefined;
-    let maskPixels: ImageData | undefined;
-    let lastFrameTime = -1;
-    let lastSegmentationTime = -Infinity;
+    let animation = 0;
+    let stopPersonRenderer: (() => void) | undefined;
     let firstFrame = true;
+    let lastDraw = -Infinity;
 
     function handleFailure() {
       if (!active) return;
-      window.clearInterval(timer);
+      cancelAnimationFrame(animation);
+      stopPersonRenderer?.();
       if (recorder.current?.state === 'recording') recorder.current.stop();
       stream.current?.getTracks().forEach((track) => track.stop());
       stream.current = null;
@@ -210,58 +186,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     }
 
     function draw() {
-      if (!segmenter || !feed || !output || !ctx || !fg || !maskContext) return;
+      if (!active || !output || !ctx) return;
       const now = performance.now();
-      if (feed.readyState >= 2 && feed.videoWidth && feed.currentTime !== lastFrameTime && now - lastSegmentationTime >= 60) {
-        lastFrameTime = feed.currentTime;
-        lastSegmentationTime = now;
-        const { width, height } = output;
-        const scale = Math.max(width / feed.videoWidth, height / feed.videoHeight);
-        const cropWidth = width / scale;
-        const cropHeight = height / scale;
-        const cropX = (feed.videoWidth - cropWidth) / 2;
-        const cropY = (feed.videoHeight - cropHeight) / 2;
-        try {
-          segmenter.segmentForVideo(feed, now, ({ confidenceMasks }) => {
-            // Class zero is background. Its inverse keeps all person classes in the frame.
-            const backgroundMask = confidenceMasks?.[0];
-            if (!backgroundMask) throw new Error('Person mask unavailable');
-            if (!maskPixels || maskPixels.width !== backgroundMask.width || maskPixels.height !== backgroundMask.height) {
-              mask.width = backgroundMask.width;
-              mask.height = backgroundMask.height;
-              maskPixels = maskContext.createImageData(mask.width, mask.height);
-            }
-            const confidence = backgroundMask.getAsFloat32Array();
-            for (let pixel = 0; pixel < confidence.length; pixel++) {
-              const person = Math.max(0, Math.min(1, (0.85 - confidence[pixel]) / 0.7));
-              maskPixels.data[pixel * 4 + 3] = person * 255;
-            }
-            maskContext.putImageData(maskPixels, 0, 0);
-  
-            fg.clearRect(0, 0, width, height);
-            fg.save();
-            if (facing === 'user') {
-              fg.translate(width, 0);
-              fg.scale(-1, 1);
-            }
-            fg.drawImage(feed, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
-            fg.globalCompositeOperation = 'destination-in';
-            const maskScaleX = mask.width / feed.videoWidth;
-            const maskScaleY = mask.height / feed.videoHeight;
-            fg.drawImage(mask, cropX * maskScaleX, cropY * maskScaleY, cropWidth * maskScaleX, cropHeight * maskScaleY, 0, 0, width, height);
-            fg.restore();
-  
-            if (firstFrame) {
-              firstFrame = false;
-              setReady(true);
-            }
-          });
-        } catch {
-          handleFailure();
-          return;
-        }
-      }
-
       if (firstFrame) return;
       const video = backdropVideo.current;
       if (video && video.readyState >= 2 && video.videoWidth && video.videoHeight) {
@@ -284,7 +210,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         ctx.drawImage(skyMist, cloudX, output.height * 0.055, cloudWidth, cloudHeight);
         ctx.restore();
       }
-      ctx.drawImage(foreground, 0, 0);
+      ctx.drawImage(foreground, 0, 0, output.width, output.height);
       // Composite over the person so the same moving leaves are captured in photos and videos.
       if (leaves?.complete && leaves.naturalWidth) {
         const elapsed = (now - breezeStartedAt) / 1000;
@@ -317,14 +243,19 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         // A missing decorative asset must not stop the camera experience.
         await Promise.all([leaves, rightLeaves].map(sprite => sprite?.decode().catch(() => undefined)));
         if (!active) return;
-        const model = await loadPersonSegmenter();
-        if (!active) {
-          model.close();
-          return;
-        }
-        segmenter = model;
-        timer = window.setInterval(draw, 1000 / 30);
-        draw();
+        stopPersonRenderer = startPersonRenderer(feed!, foreground, facing === 'user', () => {
+          if (!active) return;
+          firstFrame = false;
+          setReady(true);
+        }, handleFailure, () => reviewing.current);
+        const render = (timestamp: number) => {
+          if (!active) return;
+          animation = requestAnimationFrame(render);
+          if (document.hidden || reviewing.current || timestamp - lastDraw < 1000 / 30) return;
+          lastDraw = timestamp;
+          draw();
+        };
+        animation = requestAnimationFrame(render);
       } catch {
         handleFailure();
       }
@@ -333,8 +264,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     void startSegmentation();
     return () => {
       active = false;
-      window.clearInterval(timer);
-      segmenter?.close();
+      cancelAnimationFrame(animation);
+      stopPersonRenderer?.();
     };
   }, [permission, facing, switching, image, slug]);
 
@@ -367,7 +298,11 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     const feed = camera.current;
     if (!feed) return;
     const media = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: exact ? { exact: direction } : { ideal: direction } },
+      video: {
+        facingMode: exact ? { exact: direction } : { ideal: direction },
+        width: { ideal: 720 }, height: { ideal: 1280 },
+        frameRate: { ideal: 30, max: 30 },
+      },
       audio: includeMicrophone ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : false,
     });
     if (!open.current) {
@@ -528,6 +463,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
 
   const reviewingVideo = saved && !saved.filename.endsWith('.jpg') ? saved : null;
   useEffect(() => {
+    reviewing.current = Boolean(reviewingVideo);
     const monitor = audio.current?.monitor;
     if (monitor) monitor.gain.value = permission === 'allowed' && !reviewingVideo ? 1 : 0;
   }, [permission, reviewingVideo]);
@@ -539,8 +475,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       ref={dialog}
       aria-label={`${name} camera experience`}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
-      className="m-auto max-h-none max-w-none overflow-hidden rounded-2xl bg-black p-0 text-white backdrop:bg-black/75"
-      style={{ width: 'min(calc(100vw - 2rem), calc(56.25dvh - 1.125rem), 1080px)' }}
+      className="ar-dialog m-auto max-h-none max-w-none overflow-hidden rounded-2xl bg-black p-0 text-white backdrop:bg-black/75"
     >
       <div className="relative aspect-[9/16]">
         <video
@@ -565,11 +500,11 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
         </button>
         {permission !== 'allowed' && (
           <div className="absolute inset-0 grid place-items-center bg-black/35 p-4 text-center">
-            <div className="max-w-xs rounded-2xl bg-black/80 p-4">
+            <div className="max-w-xs rounded-2xl bg-black/80 p-5 text-base leading-relaxed">
               <p>This experience needs access to your camera and microphone. Allow access?</p>
               <div className="mt-4 flex justify-center gap-3">
-                <button type="button" disabled={permission === 'loading'} onClick={startCamera} className="rounded-full bg-white px-4 py-2 text-black disabled:opacity-50">Yes</button>
-                <button type="button" onClick={onClose} className="rounded-full border border-white/60 px-4 py-2">No</button>
+                <button type="button" disabled={permission === 'loading'} onClick={startCamera} className="min-h-12 min-w-16 rounded-full bg-white px-4 py-2 text-black disabled:opacity-50">Yes</button>
+                <button type="button" onClick={onClose} className="min-h-12 min-w-16 rounded-full border border-white/60 px-4 py-2">No</button>
               </div>
               {permission === 'loading' && <p role="status" className="mt-3 text-sm">Waiting for camera permission…</p>}
               {message && <p role="status" className="mt-3 text-sm">{message}</p>}
@@ -577,7 +512,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           </div>
         )}
         {permission === 'allowed' && (
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-center">
+          <div className="absolute inset-x-0 bottom-0 ar-capture-controls bg-gradient-to-t from-black/70 to-transparent p-3 text-center">
             {recording && <p role="timer" aria-label="Recording time" className="mx-auto mb-2 w-fit rounded-full bg-black/65 px-3 py-1 text-sm tabular-nums">{elapsed}</p>}
             <div className="relative flex justify-center gap-3">
               {reviewingVideo ? (
@@ -608,14 +543,28 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
 }
 
 function ArExperiencePage() {
-  const [selectedSample, setSelectedSample] = useState<ArSample | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => { setClientReady(true); }, []);
+  // Prerendered HTML has no query-specific dialog. Open it after hydration.
+  const selectedSample = clientReady ? arSamples.find(sample => sample.slug === searchParams.get('filter')) ?? null : null;
+  const [qrSample, setQrSample] = useState<ArSample | null>(null);
+  function selectSample(sample: ArSample | null) {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      if (sample) next.set('filter', sample.slug);
+      else next.delete('filter');
+      return next;
+    }, { replace: !sample });
+  }
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
         <h1 className="display">Augment Reality (AR) Experience</h1>
-        <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-2 sm:gap-6">
+        <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
           {arSamples.map((sample) => (
-            <li key={sample.slug} className="relative min-w-0">
+            <li key={sample.slug} className="mx-auto w-full max-w-[22rem] min-w-0">
+              <div className="relative">
               <img
                 src={sample.image}
                 alt={sample.name}
@@ -626,18 +575,28 @@ function ArExperiencePage() {
               <div className="absolute inset-0 grid place-items-center p-1.5 sm:p-3">
                 <button
                   type="button"
-                  onClick={() => setSelectedSample(sample)}
+                  onClick={() => selectSample(sample)}
                   aria-label={`click me to experience ${sample.name}`}
-                  className="flex min-h-11 max-w-full flex-col items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-sm"
+                  className="flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-lg"
                 >
                   <Camera size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
                   <span>click me to experience</span>
                 </button>
               </div>
+              </div>
+              <div className="mt-3 flex items-center justify-center gap-5 text-base text-mute">
+                <Link to={filterPath(sample.slug)} aria-label={`Share ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
+                  <Link2 size={18} strokeWidth={1.5} aria-hidden="true" />share
+                </Link>
+                <button type="button" onClick={() => setQrSample(sample)} aria-label={`QR code for ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
+                  <QrCode size={18} strokeWidth={1.5} aria-hidden="true" />QR code
+                </button>
+              </div>
             </li>
           ))}
         </ul>
-        {selectedSample && <CameraExperience key={selectedSample.slug} sample={selectedSample} onClose={() => setSelectedSample(null)} />}
+        {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
+        {selectedSample && <CameraExperience key={selectedSample.slug} sample={selectedSample} onClose={() => selectSample(null)} />}
       </main>
       <Footer />
     </div>
@@ -664,6 +623,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

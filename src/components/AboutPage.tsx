@@ -27,7 +27,7 @@ const MeditationPractice = () => {
   };
 
   return (
-    <div className="absolute inset-y-0 -right-3 left-[calc(50%+2.5rem)] z-10">
+    <div className="meditation-control absolute inset-y-0 -right-3 left-[calc(50%+2.5rem)] z-10">
       <style>{`
         @keyframes meditation-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgb(37 97 121 / 16%); }
@@ -63,7 +63,7 @@ const MeditationPractice = () => {
         {!playing && (
           <p
             id="lilian-practice-invitation"
-            className="absolute bottom-12 left-4 right-0 max-w-[9rem] origin-bottom-left rounded-xl bg-mist px-2 py-1.5 text-[11px] leading-snug text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
+            className="meditation-invitation absolute bottom-12 left-4 right-0 max-w-[9rem] origin-bottom-left rounded-xl bg-mist px-2 py-1.5 text-[11px] leading-snug text-ink motion-safe:animate-[meditation-bubble-in_300ms_ease-out_both]"
           >
             <span aria-hidden="true" className="absolute -bottom-1 left-2 h-2 w-2 rotate-45 bg-mist" />
             {hasError ? (
@@ -187,7 +187,7 @@ ties.
           </p>
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-3">
+        <div className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-3">
           {teamMembers.map((member) => (
             <div key={member.name} className="rounded-3xl bg-white px-6 py-10 text-center">
               <div>
@@ -304,3 +304,4 @@ ties.
 };
 
 export default AboutPage;
+
