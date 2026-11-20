@@ -628,7 +628,7 @@ function ArExperiencePage({ working = false }: { working?: boolean }) {
             <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
             <div className="absolute inset-0 grid place-items-center p-3">
               <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
-                <ShoppingBasket size={22} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
+                <ShoppingBasket size={66} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
               </button>
             </div>
           </li>)}
