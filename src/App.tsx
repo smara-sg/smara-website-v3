@@ -50,7 +50,7 @@ const workingArSamples: ArSample[] = [
 const collectionSamples = [
   { name: 'Moonlit Mandala', image: '/images/ar-mandala-2g.jpg' },
   { name: 'Mountain Mandala', image: '/images/ar-mandala-3b.jpg' },
-  { name: 'Waterfall and Kingfisher', image: '/images/ar-waterfall-kingfisher.jpg' },
+  { name: 'Waterfall and Kingfisher', image: '/images/ar-waterfall-kingfisher.jpg', showBrand: true },
 ];
 const overlayClass = 'flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)]';
 
@@ -624,8 +624,12 @@ function ArExperiencePage({ working = false }: { working?: boolean }) {
           {(working ? workingArSamples : publicArSamples).map(sample => <ArFilterCard key={sample.slug} sample={sample} onQr={setQrSample} />)}
         </ul>
         {!working && <ul aria-label="Collect filters" className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
-          {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem]">
+          {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem] [container-type:inline-size]">
             <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+            {'showBrand' in sample && sample.showBrand && <div aria-label="SMARA" className="pointer-events-none absolute bottom-[3%] right-[5%] flex w-[16%] flex-col items-center gap-[1.8cqw] drop-shadow-[0_0_3px_rgba(255,255,255,0.6)]">
+              <img src={arLogo} alt="" width={76} height={144} className="block h-auto w-[42%]" />
+              <span className="text-[3.1cqw] font-normal leading-none tracking-[0.27em] text-white">SMARA</span>
+            </div>}
             <div className="absolute inset-0 grid place-items-center p-3">
               <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
                 <ShoppingBasket size={66} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
