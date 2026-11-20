@@ -23,7 +23,7 @@ test('each JPEG QR decodes to its distinct public filter URL', () => {
     const url = publicFilterUrl(slug);
     urls.add(url);
     assert.equal(new URL(url).searchParams.get('filter'), slug);
-    assert.equal(new URL(url).pathname, '/ar-camera/');
+    assert.equal(new URL(url).pathname, slug === 'tropical-mandala' ? '/ar-camera/' : '/hidden-working-filters/camera/');
     assert.equal(new URL(url).origin, 'https://smara.online');
     const matrix = createQrMatrix(url);
     const scale = 8, border = 4;
@@ -40,10 +40,12 @@ test('each JPEG QR decodes to its distinct public filter URL', () => {
     const decoded = jpeg.decode(compressed, { useTArray: true });
     assert.equal(jsQR(new Uint8ClampedArray(decoded.data), size, size)?.data, url);
   }
-  assert.equal(urls.size, 6);
+  assert.equal(urls.size, 3);
 });
 
 test('filter URLs reject unknown experiences instead of producing broken links', () => {
   assert.throws(() => filterPath('missing-filter'), /Unknown AR filter/);
   assert.throws(() => filterPath('mandala'), /Unknown AR filter/);
 });
+
+test('retired filters cannot launch', () => { for (const slug of ['moonlit-lotus-pond', 'misty-mountain', 'tropical-beach']) assert.throws(() => filterPath(slug), /Unknown AR filter/); });
