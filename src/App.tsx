@@ -52,7 +52,7 @@ const collectionSamples = [
   { name: 'Mountain Mandala', image: '/images/ar-mandala-3b.jpg' },
   { name: 'Waterfall and Kingfisher', image: '/images/ar-waterfall-kingfisher.jpg', showBrand: true },
 ];
-const overlayClass = 'flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)]';
+const overlayClass = 'flex min-h-11 max-w-full flex-col items-center justify-center gap-3 px-3 py-3 text-[22px] font-semibold leading-tight text-white [text-shadow:0_2px_3px_rgba(0,0,0,1),0_0_12px_rgba(0,0,0,0.95),0_0_3px_rgba(255,255,255,0.5)] [&>svg]:shrink-0 [&>svg]:[filter:drop-shadow(0_2px_3px_rgba(0,0,0,0.95))_drop-shadow(0_0_5px_rgba(255,255,255,0.65))]';
 
 const arLogo = '/images/smara-ar-logo.png';
 // Set to zero to remove the optional, very faint lily-pond sky movement.
@@ -578,7 +578,7 @@ function ArFilterCard({ sample, onQr }: { sample: ArSample; onQr: (sample: ArSam
       <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
       <div className="absolute inset-0 grid place-items-center p-3">
         <a href={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`click me to experience ${sample.name} (opens in a new tab)`} className={overlayClass}>
-          <Camera size={20} strokeWidth={1.5} aria-hidden="true" /><span>click me to experience</span>
+          <Camera size={60} strokeWidth={1.5} aria-hidden="true" /><span>click me to experience</span>
         </a>
       </div>
     </div>
@@ -632,7 +632,7 @@ function ArExperiencePage({ working = false }: { working?: boolean }) {
             </div>}
             <div className="absolute inset-0 grid place-items-center p-3">
               <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
-                <ShoppingBasket size={66} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
+                <ShoppingBasket size={72} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
               </button>
             </div>
           </li>)}
