@@ -3,7 +3,7 @@ export const filterSlugs = ['tropical-mandala', ...workingFilterSlugs] as const;
 
 export function filterPath(slug: string) {
   if (!filterSlugs.some(value => value === slug)) throw new Error('Unknown AR filter');
-  const path = workingFilterSlugs.some(value => value === slug) ? '/hidden-working-filters/camera/' : '/ar-camera/';
+  const path = workingFilterSlugs.some(value => value === slug) ? '/hiddenpage/camera/' : '/ar-camera/';
   return path + '?filter=' + encodeURIComponent(slug);
 }
 

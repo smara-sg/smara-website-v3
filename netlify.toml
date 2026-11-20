@@ -45,21 +45,21 @@ node_bundler = "esbuild"
 
 
 [[redirects]]
-  from = "/hidden-working-filters"
-  to = "/hidden-working-filters/index.html"
+  from = "/hiddenpage"
+  to = "/hiddenpage/index.html"
   status = 200
 
 [[redirects]]
-  from = "/hidden-working-filters/camera"
-  to = "/hidden-working-filters/camera/index.html"
+  from = "/hiddenpage/camera"
+  to = "/hiddenpage/camera/index.html"
   status = 200
 
 [[redirects]]
-  from = "/hidden-working-filters/media/moonlit-mandala.mp4"
+  from = "/hiddenpage/media/moonlit-mandala.mp4"
   to = "/images/ar-mandala-2g.mp4"
   status = 200
 
 [[redirects]]
-  from = "/hidden-working-filters/media/mountain-mandala.mp4"
+  from = "/hiddenpage/media/mountain-mandala.mp4"
   to = "/images/ar-mandala-3b.mp4"
   status = 200

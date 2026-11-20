@@ -19,7 +19,7 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--seo:start--
 
 const { render } = await import(pathToFileURL(serverEntry).href)
 
-const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/ar-camera', '/hidden-working-filters', '/hidden-working-filters/camera']
+const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/ar-camera', '/hiddenpage', '/hiddenpage/camera']
 const markers = {
   '/': 'Self-Gaze Meditation Augmented Reality Art',
   '/gallery': 'SMARA Artworks For Sale',
@@ -27,8 +27,8 @@ const markers = {
   '/about': 'About SMARA',
   '/ar-experience': 'Augment Reality (AR) Experience',
   '/ar-camera': 'SMARA AR camera',
-  '/hidden-working-filters': 'hidden: working filters',
-  '/hidden-working-filters/camera': 'SMARA AR camera',
+  '/hiddenpage': 'hidden: working filters',
+  '/hiddenpage/camera': 'SMARA AR camera',
   '/art-cards': 'Transform Art into Interactive Meditation',
 }
 

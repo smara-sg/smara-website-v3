@@ -35,13 +35,17 @@ export function createWorkingFilterGate(owner) {
     let path;
     try { path = decodeURIComponent(url.pathname).replace(/\/+/g, '/').toLowerCase().replace(/\/index\.html$/, '').replace(/\/$/, '') || '/'; }
     catch { return new Response('Invalid address', { status: 400 }); }
+    if (path === '/hidden-working-filters' || path.startsWith('/hidden-working-filters/')) {
+      const destination = '/hiddenpage' + path.slice('/hidden-working-filters'.length) + (path === '/hidden-working-filters' ? '/' : '') + url.search;
+      return new Response(null, { status: 302, headers: secureHeaders(new Headers({ Location: destination })) });
+    }
     const slug = url.searchParams.get('filter');
     if (path === '/ar-camera' || path === '/ar-experience') {
-      const destination = privateSlugs.has(slug) ? '/hidden-working-filters/camera/?filter=' + encodeURIComponent(slug)
+      const destination = privateSlugs.has(slug) ? '/hiddenpage/camera/?filter=' + encodeURIComponent(slug)
         : retiredSlugs.has(slug) ? '/ar-experience/' : null;
       if (destination) return new Response(null, { status: 302, headers: secureHeaders(new Headers({ Location: destination })) });
     }
-    const protectedPath = path === '/hidden-working-filters' || path.startsWith('/hidden-working-filters/')
+    const protectedPath = path === '/hiddenpage' || path.startsWith('/hiddenpage/')
       || /^\/images\/ar-mandala-(2g|3b)\.mp4$/.test(path);
     if (!protectedPath) return context.next();
     if (!await authorized(request, owner)) {
@@ -51,7 +55,7 @@ export function createWorkingFilterGate(owner) {
       }));
       return new Response(request.method === 'HEAD' ? null : '<!doctype html><title>Owner access required</title><h1>Owner access required</h1>', { status: 401, headers });
     }
-    if (path === '/hidden-working-filters/access.json') {
+    if (path === '/hiddenpage/access.json') {
       return new Response(request.method === 'HEAD' ? null : JSON.stringify({ authorized: true }), {
         headers: secureHeaders(new Headers({ 'Content-Type': 'application/json' })),
       });

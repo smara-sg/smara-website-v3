@@ -44,8 +44,8 @@ const publicArSamples: ArSample[] = [
   { name: 'Tropical Mandala', slug: 'tropical-mandala', image: '/images/ar-mandala-1h.jpg', video: '/images/ar-mandala-1h.mp4', embeddedLogo: true },
 ];
 const workingArSamples: ArSample[] = [
-  { name: 'Moonlit Mandala', slug: 'moonlit-mandala', image: '/images/ar-mandala-2g.jpg', video: '/hidden-working-filters/media/moonlit-mandala.mp4', embeddedLogo: true },
-  { name: 'Mountain Mandala', slug: 'mountain-mandala', image: '/images/ar-mandala-3b.jpg', video: '/hidden-working-filters/media/mountain-mandala.mp4', embeddedLogo: true },
+  { name: 'Moonlit Mandala', slug: 'moonlit-mandala', image: '/images/ar-mandala-2g.jpg', video: '/hiddenpage/media/moonlit-mandala.mp4', embeddedLogo: true },
+  { name: 'Mountain Mandala', slug: 'mountain-mandala', image: '/images/ar-mandala-3b.jpg', video: '/hiddenpage/media/mountain-mandala.mp4', embeddedLogo: true },
 ];
 const collectionSamples = [
   { name: 'Moonlit Mandala', image: '/images/ar-mandala-2g.jpg' },
@@ -599,7 +599,7 @@ function useWorkingAccess(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     const controller = new AbortController();
-    void fetch('/hidden-working-filters/access.json', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal })
+    void fetch('/hiddenpage/access.json', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal })
       .then(async response => response.ok && response.headers.get('content-type')?.includes('application/json') ? response.json() : null)
       .then(result => { if (!controller.signal.aborted) setAllowed(result?.authorized === true); })
       .catch(() => {});
@@ -633,7 +633,7 @@ function ArExperiencePage({ working = false }: { working?: boolean }) {
             </div>
           </li>)}
         </ul>}
-      </> : <p role="status" className="mt-10">Owner access required. <a href="/hidden-working-filters/" className="underline">Sign in</a></p>}
+      </> : <p role="status" className="mt-10">Owner access required. <a href="/hiddenpage/" className="underline">Sign in</a></p>}
       {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
     </main><Footer />
   </div>;
@@ -648,18 +648,18 @@ function StandaloneCameraPage({ working = false }: { working?: boolean }) {
   const sample = (working ? workingArSamples : publicArSamples).find(value => value.slug === searchParams.get('filter'));
   const legacyPrivate = !working && workingArSamples.find(value => value.slug === searchParams.get('filter'));
   if (clientReady && legacyPrivate) return <ServerRedirect to={filterPath(legacyPrivate.slug)} />;
-  if (clientReady && !sample) return <Navigate to={working ? '/hidden-working-filters/' : '/ar-experience/'} replace />;
+  if (clientReady && !sample) return <Navigate to={working ? '/hiddenpage/' : '/ar-experience/'} replace />;
   return <main className="min-h-[100dvh] bg-black text-white">
     <h1 className="sr-only">SMARA AR camera</h1>
     {clientReady && allowed && sample
-      ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate(working ? '/hidden-working-filters/' : '/ar-experience/')} />
+      ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate(working ? '/hiddenpage/' : '/ar-experience/')} />
       : <p role="status" className="p-6 text-center">{working && !allowed ? 'Owner access required.' : 'Opening your AR experience…'}</p>}
   </main>;
 }
 
 function App() {
   const { pathname } = useLocation();
-  const cameraPage = ['/ar-camera', '/hidden-working-filters/camera'].includes(pathname.replace(/\/$/, ''));
+  const cameraPage = ['/ar-camera', '/hiddenpage/camera'].includes(pathname.replace(/\/$/, ''));
   return (
     <div className="min-h-screen">
       <PageSeo />
@@ -671,8 +671,8 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/ar-experience" element={<ArExperiencePage />} />
         <Route path="/ar-camera" element={<StandaloneCameraPage />} />
-        <Route path="/hidden-working-filters" element={<ArExperiencePage key="working" working />} />
-        <Route path="/hidden-working-filters/camera" element={<StandaloneCameraPage key="working-camera" working />} />
+        <Route path="/hiddenpage" element={<ArExperiencePage key="working" working />} />
+        <Route path="/hiddenpage/camera" element={<StandaloneCameraPage key="working-camera" working />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/art-cards" element={<ArtCardsPage />} />
         <Route path="*" element={<NotFoundPage />} />
