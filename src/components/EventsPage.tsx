@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
 
-type EventImage = { src: string; width?: number; height?: number }
+type EventImage = { src: string; width?: number; height?: number; alt?: string }
 
 const EventsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({
@@ -24,7 +24,12 @@ const EventsPage = () => {
       id: 3,
       title: "SMARA @ Punggol Damai",
       description: "Residents of Punggol Damai came together for a morning of SMARA meditation in front of our hand-painted communal wall mural. The session offered a shared space to pause, reflect, and connect through art and mindfulness.",
-      images: [],
+      images: [
+        {"src": "/images/punggol-damai-session.jpg", "width": 2048, "height": 1152, "alt": "SMARA session in front of the hand-painted communal mural"},
+        {"src": "/images/punggol-damai-meditation.jpg", "width": 2048, "height": 1152, "alt": "Residents taking part in a guided meditation"},
+        {"src": "/images/punggol-damai-gathering.jpg", "width": 1900, "height": 1069, "alt": "A wider view of the group and mural at Punggol Damai"},
+        {"src": "/images/punggol-damai-phone-experience.jpg", "width": 1066, "height": 1895, "alt": "A close-up of the SMARA mural experience on a participant’s phone"}
+      ],
       date: "5 July 2026",
       location: "Punggol Damai"
     },
@@ -96,13 +101,14 @@ const EventsPage = () => {
             <div key={event.id} className="overflow-hidden rounded-3xl bg-mist">
               <div className="grid h-full grid-cols-1 gap-0">
                 {/* Image Carousel */}
-                {event.images.length > 0 && <div className="relative h-80 lg:h-96">
+                {event.images.length > 0 && <div className={event.id === 3 ? "relative aspect-[4/3]" : "relative h-80 lg:h-96"}>
                   <OptimizedImage
                     src={event.images[currentImageIndex[event.id] ?? 0].src}
-                    alt={`${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
+                    alt={event.images[currentImageIndex[event.id] ?? 0].alt ?? `${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
                     width={event.images[currentImageIndex[event.id] ?? 0].width}
                     height={event.images[currentImageIndex[event.id] ?? 0].height}
                     fill
+                    className={event.id === 3 ? '!object-contain' : undefined}
                   />
                   
                   {/* Carousel Controls */}
