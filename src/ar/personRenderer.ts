@@ -6,6 +6,25 @@ const visionAssets = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.
 const desktopPersonModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
 const mobilePersonModel = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite';
 
+/** Start network work while the consent dialog is visible; never request devices here. */
+export function warmPersonRenderer() {
+  const model = needsMobileMaskCompatibility(navigator) ? mobilePersonModel : desktopPersonModel;
+  for (const [rel, href, as] of [
+    ['preconnect', 'https://cdn.jsdelivr.net', ''],
+    ['preconnect', 'https://storage.googleapis.com', ''],
+    ['preload', model, 'fetch'],
+  ]) {
+    if (document.head.querySelector(`link[data-ar-warmup][href="${href}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = rel;
+    link.href = href;
+    link.crossOrigin = 'anonymous';
+    if (as) link.as = as;
+    link.dataset.arWarmup = '';
+    document.head.append(link);
+  }
+}
+
 type Mask = { width: number; height: number; getAsFloat32Array(): Float32Array };
 type CategoryMask = { width: number; height: number; getAsUint8Array(): Uint8Array };
 type Segmenter = {

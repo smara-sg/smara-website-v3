@@ -111,9 +111,17 @@ export function applyPersonMatte(
     const row0 = y0 * maskWidth * 4, row1 = y1 * maskWidth * 4;
     for (let x = 0; x < width; x++) {
       const left = map.left[x], right = map.right[x], fx = map.weight[x];
-      const a = matte[row0 + left] * (1 - fx) + matte[row0 + right] * fx;
-      const b = matte[row1 + left] * (1 - fx) + matte[row1 + right] * fx;
-      image[imageOffset] = Math.round((a * (1 - fy) + b * fy) * image[imageOffset] / 255);
+      const topLeft = matte[row0 + left], topRight = matte[row0 + right];
+      const bottomLeft = matte[row1 + left], bottomRight = matte[row1 + right];
+      // Interior/background samples are usually flat. Preserve the exact same alpha
+      // without doing bilinear arithmetic on every opaque or transparent pixel.
+      if ((topLeft | topRight | bottomLeft | bottomRight) === 0) {
+        image[imageOffset] = 0;
+      } else if ((topLeft & topRight & bottomLeft & bottomRight) !== 255) {
+        const a = topLeft * (1 - fx) + topRight * fx;
+        const b = bottomLeft * (1 - fx) + bottomRight * fx;
+        image[imageOffset] = Math.round((a * (1 - fy) + b * fy) * image[imageOffset] / 255);
+      }
       imageOffset += 4;
     }
   }

@@ -7,6 +7,34 @@ const source = fs.readFileSync(new URL('../src/ar/mask.ts', import.meta.url), 'u
 const javascript = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
 const { updatePersonAlpha, inferenceInterval } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
 
+test('optimized matte matches bilinear alpha for flat regions, soft edges and both cameras', async () => {
+  const { applyPersonMatte } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  let seed = 734;
+  const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) >>> 24);
+  for (const mirrored of [false, true]) {
+    const width = 81, height = 119, maskWidth = 13, maskHeight = 21;
+    const matte = new Uint8ClampedArray(maskWidth * maskHeight * 4);
+    for (let y = 0; y < maskHeight; y++) for (let x = 0; x < maskWidth; x++) {
+      matte[(y * maskWidth + x) * 4 + 3] = x < 4 ? 0 : x > 8 ? 255 : random();
+    }
+    const actual = Uint8ClampedArray.from({ length: width * height * 4 }, random);
+    const expected = actual.slice();
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const sx = Math.max(0, Math.min(maskWidth - 1, ((mirrored ? width - 1 - x : x) + 0.5) * maskWidth / width - 0.5));
+      const sy = Math.max(0, Math.min(maskHeight - 1, (y + 0.5) * maskHeight / height - 0.5));
+      const x0 = Math.floor(sx), x1 = Math.min(maskWidth - 1, x0 + 1), fx = sx - x0;
+      const y0 = Math.floor(sy), y1 = Math.min(maskHeight - 1, y0 + 1), fy = sy - y0;
+      const alpha = (x, y) => matte[(y * maskWidth + x) * 4 + 3];
+      const top = alpha(x0, y0) * (1 - fx) + alpha(x1, y0) * fx;
+      const bottom = alpha(x0, y1) * (1 - fx) + alpha(x1, y1) * fx;
+      const offset = (y * width + x) * 4 + 3;
+      expected[offset] = Math.round((top * (1 - fy) + bottom * fy) * expected[offset] / 255);
+    }
+    applyPersonMatte(actual, width, height, matte, maskWidth, maskHeight, mirrored);
+    assert.deepEqual(actual, expected);
+  }
+});
+
 test('matte retains foreground, removes background, and preserves soft edges', () => {
   const background = new Float32Array([0, 1, 0.5, 0.4, 0.6]);
   const rgba = new Uint8ClampedArray(20);
