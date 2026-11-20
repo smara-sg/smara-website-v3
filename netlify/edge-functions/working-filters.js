@@ -1,5 +1,5 @@
-// Only a verifier is deployed. The random owner password is never included in source.
-const owner = {"username":"smara","salt":"9e188771f76145a04293ba5637ee1191","passwordHash":"028b73912d1da7137169debf9b26f5a71f041eb821df6803f048b8b3333bea28"};
+// Only a verifier is deployed. The owner password is never included in source.
+const owner = {"username":"smara","salt":"d3f5539af0ab97ce1250da8ee0070a93","passwordHash":"e2791c2546449fc1a5a3beed4bbb85dea048da94a1f5c6bce08b468215c1a19d"};
 
 const privateSlugs = new Set(['moonlit-mandala', 'mountain-mandala']);
 const retiredSlugs = new Set(['moonlit-lotus-pond', 'misty-mountain', 'tropical-beach']);
