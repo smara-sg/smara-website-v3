@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createNarrationTransport, withNarrationPause } from './ar/narration';
 import { startPersonRenderer } from './ar/personRenderer';
 import { needsMobileMaskCompatibility } from './ar/compatibility';
 import { personPlacement } from './ar/framing';
@@ -63,6 +64,9 @@ const captureButtonClass = 'grid h-12 w-12 shrink-0 place-items-center rounded-f
 
 function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () => void }) {
   const { name, slug, image, video, embeddedLogo = false } = sample;
+  const guided = slug === 'tropical-mandala';
+  const narration = useRef<ReturnType<typeof createNarrationTransport> | null>(null);
+  const [voiceReady, setVoiceReady] = useState(!guided);
   const dialog = useRef<HTMLDialogElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
   const backdropVideo = useRef<HTMLVideoElement>(null);
@@ -112,6 +116,8 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       }
       stream.current?.getTracks().forEach((track) => track.stop());
       microphone.current?.getTracks().forEach((track) => track.stop());
+      narration.current?.dispose();
+      narration.current = null;
       void audio.current?.context.close().catch(() => {});
       URL.revokeObjectURL(downloadUrl.current);
     };
@@ -295,9 +301,12 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       const monitor = context.createGain();
       const recordedMusic = context.createGain();
       monitor.gain.value = 0;
-      recordedMusic.gain.value = 0.35;
-      soundtrack.connect(monitor).connect(context.destination);
-      soundtrack.connect(recordedMusic).connect(output);
+      recordedMusic.gain.value = guided ? 1 : 0.35;
+      const musicBed = context.createGain();
+      musicBed.gain.value = guided ? 0.3 : 1;
+      soundtrack.connect(musicBed);
+      musicBed.connect(monitor).connect(context.destination);
+      musicBed.connect(recordedMusic).connect(output);
       audio.current = { context, output, monitor };
     }
     // Unlock audible video and Web Audio in the permission button gesture.
@@ -434,7 +443,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       return;
     }
     const output = canvas.current;
-    if (!output || recorder.current) return;
+    if (!output || recorder.current || !voiceReady) return;
     setMessage('');
     if (!output.captureStream || typeof MediaRecorder === 'undefined') {
       setMessage('Video recording is unavailable in this browser. You can still take photos.');
@@ -480,9 +489,37 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     }
   }
 
+  useEffect(() => {
+    if (!guided || permission !== 'allowed') return;
+    const mix = audio.current;
+    if (!mix) return;
+    const controller = new AbortController();
+    let transport: ReturnType<typeof createNarrationTransport> | null = null;
+    setVoiceReady(false);
+    void (async () => {
+      const response = await fetch('/lilian-meditation-practice.mp3', { signal: controller.signal });
+      if (!response.ok) throw new Error('Voice unavailable');
+      const decoded = await mix.context.decodeAudioData(await response.arrayBuffer());
+      if (controller.signal.aborted) return;
+      const loop = withNarrationPause(mix.context, decoded);
+      transport = createNarrationTransport(mix.context, loop, [mix.monitor, mix.output]);
+      narration.current = transport;
+      transport.setActive(!reviewing.current);
+      setVoiceReady(true);
+    })().catch(() => {
+      if (!controller.signal.aborted) setMessage('Lilian voice couldn’t load. Close and reopen this experience to try again.');
+    });
+    return () => {
+      controller.abort();
+      transport?.dispose();
+      if (narration.current === transport) narration.current = null;
+    };
+  }, [guided, permission]);
+
   const reviewingVideo = saved && !saved.filename.endsWith('.jpg') ? saved : null;
   useEffect(() => {
     reviewing.current = Boolean(reviewingVideo);
+    narration.current?.setActive(permission === 'allowed' && !reviewingVideo);
     const monitor = audio.current?.monitor;
     if (monitor) monitor.gain.value = permission === 'allowed' && !reviewingVideo ? 1 : 0;
   }, [permission, reviewingVideo]);
@@ -553,7 +590,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
               ) : (
                 <>
                   <button type="button" disabled={!ready || switching} aria-label="Take JPEG photo" onClick={takePhoto} className={captureButtonClass}><Camera size={20} aria-hidden="true" /></button>
-                  <button type="button" disabled={!ready || switching} aria-label={recording ? 'Stop recording' : 'Record video'} aria-pressed={recording} onClick={toggleRecording} className={captureButtonClass}>
+                  <button type="button" disabled={!ready || switching || !voiceReady} aria-label={recording ? 'Stop recording' : 'Record video'} aria-pressed={recording} onClick={toggleRecording} className={captureButtonClass}>
                     {recording ? <Square size={18} aria-hidden="true" /> : <Video size={20} aria-hidden="true" />}
                   </button>
                   <button type="button" disabled={!ready || recording || switching} aria-label="Switch camera" onClick={switchCamera} className={captureButtonClass + ' absolute bottom-0 right-0 hidden [@media(pointer:coarse)]:grid'}>
@@ -563,6 +600,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
               )}
             </div>
             {!ready && <p role="status" className="mt-2 text-xs">{switching ? 'Switching camera…' : 'Preparing background removal…'}</p>}
+            {guided && !voiceReady && !message && <p role="status" className="mt-2 text-xs">Preparing Lilian voice…</p>}
             {message && <p role="status" className="mt-2 text-xs">{message}</p>}
             {saved && !reviewingVideo && <a href={saved.url} download={saved.filename} className="mt-2 inline-block text-xs underline">Download last photo</a>}
           </div>
