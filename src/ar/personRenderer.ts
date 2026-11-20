@@ -1,4 +1,4 @@
-import { inferenceInterval, updatePersonAlpha, validateConfidenceMask, backgroundFromCategories, applyPersonMatte } from './mask';
+import { inferenceInterval, updatePersonAlpha, validateConfidenceMask, backgroundFromCategories, applyPersonMatte, createMatteSamplingMap, type MatteSamplingMap, type CategoryMaskWorkspace } from './mask';
 import { needsMobileMaskCompatibility } from './compatibility';
 import { cameraFrameGeometry } from './framing';
 
@@ -9,7 +9,7 @@ const mobilePersonModel = 'https://storage.googleapis.com/mediapipe-models/image
 type Mask = { width: number; height: number; getAsFloat32Array(): Float32Array };
 type CategoryMask = { width: number; height: number; getAsUint8Array(): Uint8Array };
 type Segmenter = {
-  segmentForVideo(frame: ImageBitmap, timestamp: number, callback: (result: { confidenceMasks?: Mask[]; categoryMask?: CategoryMask }) => void): void;
+  segmentForVideo(frame: ImageBitmap | HTMLCanvasElement, timestamp: number, callback: (result: { confidenceMasks?: Mask[]; categoryMask?: CategoryMask }) => void): void;
   close(): void;
 };
 
@@ -32,6 +32,8 @@ export function startPersonRenderer(
   const maskContext = mask.getContext('2d');
   let pixels: ImageData | undefined;
   let previous: Float32Array | undefined;
+  const categoryWorkspace: CategoryMaskWorkspace = {};
+  let matteSampling: MatteSamplingMap | undefined;
   let active = true;
   let ready = false;
   let busy = false;
@@ -44,6 +46,9 @@ export function startPersonRenderer(
   let lastSubmitted = -Infinity;
   let interval = 1000 / 20;
   const extraction = document.createElement('canvas');
+  const extractionContext = extraction.getContext('2d');
+  const fallbackInput = document.createElement('canvas');
+  const fallbackInputContext = fallbackInput.getContext('2d', { willReadFrequently: true });
   // Normalize mobile camera rotation/cropping through Canvas before transferring frames.
   let directVideoBitmap = !mobileCompatibility;
 
@@ -58,7 +63,7 @@ export function startPersonRenderer(
         pixels = maskContext.createImageData(width, height);
         previous = new Float32Array(width * height);
       }
-      updatePersonAlpha(confidence, previous!, pixels!.data, !ready || resized);
+      updatePersonAlpha(confidence, previous!, pixels!.data, !ready || resized, mobileCompatibility);
       if (!byteMaskCompatibility) maskContext.putImageData(pixels!, 0, 0);
       // Work at camera detail, not 1080x1920, then upscale once in the final composition.
       if (foreground.width !== frame.width || foreground.height !== frame.height) {
@@ -81,7 +86,10 @@ export function startPersonRenderer(
       fg.restore();
       if (byteMaskCompatibility) {
         const image = fg.getImageData(0, 0, foreground.width, foreground.height);
-        applyPersonMatte(image.data, foreground.width, foreground.height, pixels!.data, width, height, mirrored);
+        if (!matteSampling || matteSampling.width !== foreground.width || matteSampling.maskWidth !== width || matteSampling.mirrored !== mirrored) {
+          matteSampling = createMatteSamplingMap(foreground.width, width, mirrored);
+        }
+        applyPersonMatte(image.data, foreground.width, foreground.height, pixels!.data, width, height, mirrored, matteSampling);
         fg.putImageData(image, 0, 0);
       }
       interval = worker ? interval * 0.75 + inferenceInterval(duration) * 0.25
@@ -132,9 +140,10 @@ export function startPersonRenderer(
       }
       // Some mobile browsers accept canvas bitmaps but not video bitmaps/options.
       if (!frame) {
-        extraction.width = width;
-        extraction.height = height;
-        const extractionContext = extraction.getContext('2d');
+        if (extraction.width !== width || extraction.height !== height) {
+          extraction.width = width;
+          extraction.height = height;
+        }
         if (!extractionContext) throw new Error('No camera frame canvas');
         extractionContext.drawImage(feed, x, y, cropWidth, cropHeight, 0, 0, width, height);
         frame = await createImageBitmap(extraction);
@@ -146,11 +155,18 @@ export function startPersonRenderer(
       } else if (fallback) {
         const started = performance.now();
         const cameraFrame = frame;
+        if (!fallbackInputContext) throw new Error('No fallback inference canvas');
+        const inputHeight = Math.round(256 * cameraFrame.height / cameraFrame.width);
+        if (fallbackInput.width !== 256 || fallbackInput.height !== inputHeight) {
+          fallbackInput.width = 256;
+          fallbackInput.height = inputHeight;
+        }
+        fallbackInputContext.drawImage(cameraFrame, 0, 0, 256, inputHeight);
         const result: { value?: { confidence: Float32Array; width: number; height: number } } = {};
-        fallback.segmentForVideo(cameraFrame, timestamp, ({ confidenceMasks, categoryMask }) => {
+        fallback.segmentForVideo(fallbackInput, timestamp, ({ confidenceMasks, categoryMask }) => {
           if (byteMaskCompatibility) {
             if (!categoryMask) throw new Error('No category mask');
-            result.value = { confidence: backgroundFromCategories(categoryMask.getAsUint8Array(), categoryMask.width, categoryMask.height, mobileCompatibility), width: categoryMask.width, height: categoryMask.height };
+            result.value = { confidence: backgroundFromCategories(categoryMask.getAsUint8Array(), categoryMask.width, categoryMask.height, mobileCompatibility, categoryWorkspace), width: categoryMask.width, height: categoryMask.height };
             return;
           }
           const background = confidenceMasks?.[0];
@@ -186,14 +202,14 @@ export function startPersonRenderer(
     void startFallback();
   } else {
     try {
-      worker = new Worker('/ar-segmentation-worker.js?v=mobile-person-3');
+      worker = new Worker('/ar-segmentation-worker.js?v=person-outline-4');
       worker.onmessage = ({ data }) => {
         if (!active) { data.frame?.close(); return; }
         if (data.type === 'ready') { clearTimeout(watchdog); schedule(); }
         else if (data.type === 'result') {
           try {
             const confidence = data.categories
-              ? backgroundFromCategories(new Uint8Array(data.categories), data.width, data.height, mobileCompatibility)
+              ? backgroundFromCategories(new Uint8Array(data.categories), data.width, data.height, mobileCompatibility, categoryWorkspace)
               : new Float32Array(data.confidence);
             finishFrame(data.frame, confidence, data.width, data.height, data.duration);
           }
