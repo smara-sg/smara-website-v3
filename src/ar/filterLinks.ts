@@ -1,8 +1,10 @@
-export const filterSlugs = ['moonlit-lotus-pond', 'misty-mountain', 'tropical-beach', 'moonlit-mandala', 'mountain-mandala', 'tropical-mandala'] as const;
+export const workingFilterSlugs = ['moonlit-mandala', 'mountain-mandala'] as const;
+export const filterSlugs = ['tropical-mandala', ...workingFilterSlugs] as const;
 
 export function filterPath(slug: string) {
   if (!filterSlugs.some(value => value === slug)) throw new Error('Unknown AR filter');
-  return '/ar-camera/?filter=' + encodeURIComponent(slug);
+  const path = workingFilterSlugs.some(value => value === slug) ? '/hidden-working-filters/camera/' : '/ar-camera/';
+  return path + '?filter=' + encodeURIComponent(slug);
 }
 
 export function publicFilterUrl(slug: string) {

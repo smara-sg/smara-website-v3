@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { startPersonRenderer } from './ar/personRenderer';
 import { needsMobileMaskCompatibility } from './ar/compatibility';
 import { personPlacement } from './ar/framing';
-import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
+import { Camera, Download, Link2, QrCode, ShoppingBasket, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
 import { Routes, Route, Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FilterQrDialog from './components/FilterQrDialog';
 import { filterPath } from './ar/filterLinks';
@@ -40,14 +40,19 @@ function Home() {
 
 type ArSample = { name: string; slug: string; image: string; video: string; embeddedLogo?: boolean; newRow?: boolean };
 
-const arSamples: ArSample[] = [
-  { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-seamless.mp4' },
-  { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-seamless.mp4' },
-  { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-seamless.mp4' },
-  { name: 'Moonlit Mandala', slug: 'moonlit-mandala', image: '/images/ar-mandala-2g.jpg', video: '/images/ar-mandala-2g.mp4', embeddedLogo: true, newRow: true },
-  { name: 'Mountain Mandala', slug: 'mountain-mandala', image: '/images/ar-mandala-3b.jpg', video: '/images/ar-mandala-3b.mp4', embeddedLogo: true },
+const publicArSamples: ArSample[] = [
   { name: 'Tropical Mandala', slug: 'tropical-mandala', image: '/images/ar-mandala-1h.jpg', video: '/images/ar-mandala-1h.mp4', embeddedLogo: true },
 ];
+const workingArSamples: ArSample[] = [
+  { name: 'Moonlit Mandala', slug: 'moonlit-mandala', image: '/images/ar-mandala-2g.jpg', video: '/hidden-working-filters/media/moonlit-mandala.mp4', embeddedLogo: true },
+  { name: 'Mountain Mandala', slug: 'mountain-mandala', image: '/images/ar-mandala-3b.jpg', video: '/hidden-working-filters/media/mountain-mandala.mp4', embeddedLogo: true },
+];
+const collectionSamples = [
+  { name: 'Moonlit Mandala', image: '/images/ar-mandala-2g.jpg' },
+  { name: 'Mountain Mandala', image: '/images/ar-mandala-3b.jpg' },
+  { name: 'Waterfall and Kingfisher', image: '/images/ar-waterfall-kingfisher.jpg' },
+];
+const overlayClass = 'flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)]';
 
 const arLogo = '/images/smara-ar-logo.png';
 // Set to zero to remove the optional, very faint lily-pond sky movement.
@@ -567,80 +572,94 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
   );
 }
 
-function ArExperiencePage() {
+function ArFilterCard({ sample, onQr }: { sample: ArSample; onQr: (sample: ArSample) => void }) {
+  return <li className="mx-auto w-full max-w-[22rem] min-w-0">
+    <div className="relative">
+      <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+      <div className="absolute inset-0 grid place-items-center p-3">
+        <a href={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`click me to experience ${sample.name} (opens in a new tab)`} className={overlayClass}>
+          <Camera size={20} strokeWidth={1.5} aria-hidden="true" /><span>click me to experience</span>
+        </a>
+      </div>
+    </div>
+    <div className="mt-3 flex items-center justify-center gap-5 text-base text-mute">
+      <Link to={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`Share ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink"><Link2 size={18} strokeWidth={1.5} aria-hidden="true" />share</Link>
+      <button type="button" onClick={() => onQr(sample)} aria-label={`QR code for ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink"><QrCode size={18} strokeWidth={1.5} aria-hidden="true" />QR code</button>
+    </div>
+  </li>;
+}
+
+function ServerRedirect({ to }: { to: string }) {
+  useEffect(() => { window.location.replace(to); }, [to]);
+  return <p role="status">Opening your AR experience…</p>;
+}
+
+function useWorkingAccess(enabled: boolean) {
+  const [allowed, setAllowed] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    const controller = new AbortController();
+    void fetch('/hidden-working-filters/access.json', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal })
+      .then(async response => response.ok && response.headers.get('content-type')?.includes('application/json') ? response.json() : null)
+      .then(result => { if (!controller.signal.aborted) setAllowed(result?.authorized === true); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [enabled]);
+  return !enabled || allowed;
+}
+
+function ArExperiencePage({ working = false }: { working?: boolean }) {
   const [searchParams] = useSearchParams();
   const [clientReady, setClientReady] = useState(false);
   useEffect(() => { setClientReady(true); }, []);
-  // Resolve legacy query links after hydration, preserving the static gallery HTML.
-  const selectedSample = clientReady ? arSamples.find(sample => sample.slug === searchParams.get('filter')) ?? null : null;
+  const allowed = useWorkingAccess(working);
+  const selectedSample = clientReady ? [...publicArSamples, ...workingArSamples].find(sample => sample.slug === searchParams.get('filter')) : null;
   const [qrSample, setQrSample] = useState<ArSample | null>(null);
-  // Keep previously shared and printed QR URLs working.
-  if (selectedSample) return <Navigate to={filterPath(selectedSample.slug)} replace />;
-  return (
-    <div className="min-h-screen bg-white">
-      <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
-        <h1 className="display">Augment Reality (AR) Experience</h1>
-        <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
-          {arSamples.map((sample) => (
-            <li key={sample.slug} className={`mx-auto w-full max-w-[22rem] min-w-0 ${sample.newRow ? 'col-start-1' : ''}`}>
-              <div className="relative">
-              <img
-                src={sample.image}
-                alt={sample.name}
-                width={1080}
-                height={1920}
-                className="block h-auto w-full rounded-2xl sm:rounded-3xl"
-              />
-              <div className="absolute inset-0 grid place-items-center p-1.5 sm:p-3">
-                <a
-                  href={filterPath(sample.slug)}
-                  target="_blank" rel="noopener noreferrer"
-                  aria-label={`click me to experience ${sample.name} (opens in a new tab)`}
-                  className="flex min-h-11 max-w-full flex-col items-center justify-center gap-2 px-4 py-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_9px_rgba(0,0,0,0.7)] sm:px-4 sm:text-lg"
-                >
-                  <Camera size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
-                  <span>click me to experience</span>
-                </a>
-              </div>
-              </div>
-              <div className="mt-3 flex items-center justify-center gap-5 text-base text-mute">
-                <Link to={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`Share ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
-                  <Link2 size={18} strokeWidth={1.5} aria-hidden="true" />share
-                </Link>
-                <button type="button" onClick={() => setQrSample(sample)} aria-label={`QR code for ${sample.name}`} className="inline-flex min-h-12 items-center gap-2 hover:text-ink">
-                  <QrCode size={18} strokeWidth={1.5} aria-hidden="true" />QR code
-                </button>
-              </div>
-            </li>
-          ))}
+  if (selectedSample) return <ServerRedirect to={filterPath(selectedSample.slug)} />;
+  return <div className="min-h-screen bg-white">
+    <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
+      <h1 className="display">{working ? 'hidden: working filters' : 'Augment Reality (AR) Experience'}</h1>
+      {allowed ? <>
+        <ul aria-label={working ? 'Working AR filters' : 'AR filter samples'} className={working ? 'mx-auto mt-10 grid max-w-xl grid-cols-1 gap-6 min-[480px]:grid-cols-2' : 'mx-auto mt-10 w-full max-w-[22rem] md:max-w-[15rem]'}>
+          {(working ? workingArSamples : publicArSamples).map(sample => <ArFilterCard key={sample.slug} sample={sample} onQr={setQrSample} />)}
         </ul>
-        {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
-      </main>
-      <Footer />
-    </div>
-  );
+        {!working && <ul aria-label="Collect filters" className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
+          {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem]">
+            <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+            <div className="absolute inset-0 grid place-items-center p-3">
+              <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
+                <ShoppingBasket size={22} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
+              </button>
+            </div>
+          </li>)}
+        </ul>}
+      </> : <p role="status" className="mt-10">Owner access required. <a href="/hidden-working-filters/" className="underline">Sign in</a></p>}
+      {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
+    </main><Footer />
+  </div>;
 }
 
-function StandaloneCameraPage() {
+function StandaloneCameraPage({ working = false }: { working?: boolean }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [clientReady, setClientReady] = useState(false);
   useEffect(() => { setClientReady(true); }, []);
-  const sample = arSamples.find(value => value.slug === searchParams.get('filter'));
-  if (clientReady && !sample) return <Navigate to="/ar-experience/" replace />;
-  return (
-    <main className="min-h-[100dvh] bg-black text-white">
-      <h1 className="sr-only">SMARA AR camera</h1>
-      {clientReady && sample
-        ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
-        : <p role="status" className="p-6 text-center">Opening your AR experience…</p>}
-    </main>
-  );
+  const allowed = useWorkingAccess(working);
+  const sample = (working ? workingArSamples : publicArSamples).find(value => value.slug === searchParams.get('filter'));
+  const legacyPrivate = !working && workingArSamples.find(value => value.slug === searchParams.get('filter'));
+  if (clientReady && legacyPrivate) return <ServerRedirect to={filterPath(legacyPrivate.slug)} />;
+  if (clientReady && !sample) return <Navigate to={working ? '/hidden-working-filters/' : '/ar-experience/'} replace />;
+  return <main className="min-h-[100dvh] bg-black text-white">
+    <h1 className="sr-only">SMARA AR camera</h1>
+    {clientReady && allowed && sample
+      ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate(working ? '/hidden-working-filters/' : '/ar-experience/')} />
+      : <p role="status" className="p-6 text-center">{working && !allowed ? 'Owner access required.' : 'Opening your AR experience…'}</p>}
+  </main>;
 }
 
 function App() {
   const { pathname } = useLocation();
-  const cameraPage = pathname.replace(/\/$/, '') === '/ar-camera';
+  const cameraPage = ['/ar-camera', '/hidden-working-filters/camera'].includes(pathname.replace(/\/$/, ''));
   return (
     <div className="min-h-screen">
       <PageSeo />
@@ -652,6 +671,8 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/ar-experience" element={<ArExperiencePage />} />
         <Route path="/ar-camera" element={<StandaloneCameraPage />} />
+        <Route path="/hidden-working-filters" element={<ArExperiencePage key="working" working />} />
+        <Route path="/hidden-working-filters/camera" element={<StandaloneCameraPage key="working-camera" working />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/art-cards" element={<ArtCardsPage />} />
         <Route path="*" element={<NotFoundPage />} />

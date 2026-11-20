@@ -43,3 +43,23 @@ node_bundler = "esbuild"
   to = "/ar-camera/index.html"
   status = 200
 
+
+[[redirects]]
+  from = "/hidden-working-filters"
+  to = "/hidden-working-filters/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/hidden-working-filters/camera"
+  to = "/hidden-working-filters/camera/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/hidden-working-filters/media/moonlit-mandala.mp4"
+  to = "/images/ar-mandala-2g.mp4"
+  status = 200
+
+[[redirects]]
+  from = "/hidden-working-filters/media/mountain-mandala.mp4"
+  to = "/images/ar-mandala-3b.mp4"
+  status = 200
