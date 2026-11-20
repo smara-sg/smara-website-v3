@@ -21,6 +21,14 @@ const EventsPage = () => {
     location: string
   }> = [
     {
+      id: 3,
+      title: "SMARA @ Punggol Damai",
+      description: "Residents of Punggol Damai came together for a morning of SMARA meditation in front of our hand-painted communal wall mural. The session offered a shared space to pause, reflect, and connect through art and mindfulness.",
+      images: [],
+      date: "5 July 2026",
+      location: "Punggol Damai"
+    },
+    {
       id: 0,
       title: "SMARA @ SAMH",
       description: "A two-day event featuring various mindfulness activities for the neighbourhood elderly. Participants were invited to experience self-gaze meditation sessions, alongside other activities planned by SAMH.",
@@ -86,9 +94,9 @@ const EventsPage = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <div key={event.id} className="overflow-hidden rounded-3xl bg-mist">
-              <div className="grid grid-cols-1 gap-0">
+              <div className="grid h-full grid-cols-1 gap-0">
                 {/* Image Carousel */}
-                <div className="relative h-80 lg:h-96">
+                {event.images.length > 0 && <div className="relative h-80 lg:h-96">
                   <OptimizedImage
                     src={event.images[currentImageIndex[event.id] ?? 0].src}
                     alt={`${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
@@ -127,7 +135,7 @@ const EventsPage = () => {
                       </button>
                     ))}
                   </div>
-                </div>
+                </div>}
 
                 {/* Event Content */}
                 <div className="flex flex-col justify-center p-7">
