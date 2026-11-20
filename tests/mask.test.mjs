@@ -80,3 +80,50 @@ test('single-output selfie masks preserve category zero people and remove catego
   assert.equal(rgba[3], 0);
   assert.throws(() => backgroundFromCategories(new Uint8Array([1]), 1, 1, true));
 });
+
+test('small interior mask gaps are repaired without filling larger background openings', async () => {
+  const { backgroundFromCategories } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  const isolated = new Uint8Array(25); isolated[12] = 255;
+  assert.deepEqual([...backgroundFromCategories(isolated, 5, 5, true)], Array(25).fill(0));
+  const opening = new Uint8Array(25);
+  for (let y = 1; y <= 3; y++) for (let x = 1; x <= 3; x++) opening[y * 5 + x] = 255;
+  assert.equal(backgroundFromCategories(opening, 5, 5, true)[12], 1);
+});
+
+test('mobile edges stabilize small changes, retain faint details and follow large motion immediately', () => {
+  const previous = new Float32Array([.5, 0, 1]);
+  const rgba = new Uint8ClampedArray(12);
+  updatePersonAlpha(new Float32Array([.25, 0, 1]), previous, rgba, false, true);
+  assert.ok(Math.abs(previous[0] - .675) < .00001);
+  assert.equal(previous[1], 1); assert.equal(previous[2], 0);
+  assert.equal(rgba[7], 255); assert.equal(rgba[11], 0);
+  const standard = new Uint8ClampedArray(4), softened = new Uint8ClampedArray(4);
+  updatePersonAlpha(new Float32Array([.75]), new Float32Array(1), standard, true);
+  updatePersonAlpha(new Float32Array([.75]), new Float32Array(1), softened, true, true);
+  assert.ok(softened[3] > standard[3] && softened[3] < 128);
+});
+
+test('category work buffers are reused and resized without retaining old mask pixels', async () => {
+  const { backgroundFromCategories } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  const workspace = {};
+  const first = backgroundFromCategories(new Uint8Array(16), 4, 4, true, workspace);
+  const raw = workspace.background, horizontal = workspace.horizontal;
+  const next = backgroundFromCategories(new Uint8Array(16).fill(255), 4, 4, true, workspace);
+  assert.equal(first, next); assert.equal(workspace.background, raw); assert.equal(workspace.horizontal, horizontal);
+  assert.deepEqual([...next], Array(16).fill(1));
+  const resized = backgroundFromCategories(new Uint8Array(6), 3, 2, true, workspace);
+  assert.notEqual(resized, next); assert.equal(resized.length, 6);
+  assert.deepEqual([...resized], Array(6).fill(0));
+});
+
+test('cached alpha sampling keeps front/back alignment and respects source opacity', async () => {
+  const { createMatteSamplingMap, applyPersonMatte } = await import('data:text/javascript;base64,' + Buffer.from(javascript).toString('base64'));
+  const matte = new Uint8ClampedArray([0, 0, 0, 0, 0, 0, 0, 255]);
+  const map = createMatteSamplingMap(4, 2, false);
+  const image = new Uint8ClampedArray(16).fill(128);
+  applyPersonMatte(image, 4, 1, matte, 2, 1, false, map);
+  assert.deepEqual([image[3], image[7], image[11], image[15]], [0, 32, 96, 128]);
+  const mirrored = new Uint8ClampedArray(16).fill(255);
+  applyPersonMatte(mirrored, 4, 1, matte, 2, 1, true, map);
+  assert.deepEqual([mirrored[3], mirrored[7], mirrored[11], mirrored[15]], [255, 191, 64, 0]);
+});

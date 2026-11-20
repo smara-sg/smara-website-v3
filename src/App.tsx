@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { startPersonRenderer } from './ar/personRenderer';
-import LegacyMandalaExperience from './ar/LegacyMandalaExperience';
 import { needsMobileMaskCompatibility } from './ar/compatibility';
 import { personPlacement } from './ar/framing';
 import { Camera, Download, Link2, QrCode, RotateCcw, Square, SwitchCamera, Video, X } from 'lucide-react';
@@ -39,13 +38,15 @@ function Home() {
   );
 }
 
-type ArSample = { name: string; slug: string; image: string; video: string; legacy?: boolean };
+type ArSample = { name: string; slug: string; image: string; video: string; embeddedLogo?: boolean; newRow?: boolean };
 
 const arSamples: ArSample[] = [
   { name: 'Moonlit Lotus Pond', slug: 'moonlit-lotus-pond', image: '/images/ar-moonlit-lotus-pond.jpg', video: '/images/ar-moonlit-lotus-pond-seamless.mp4' },
   { name: 'Misty Mountain', slug: 'misty-mountain', image: '/images/ar-misty-mountain-v2.jpg', video: '/images/ar-misty-mountain-seamless.mp4' },
   { name: 'Tropical Beach', slug: 'tropical-beach', image: '/images/ar-tropical-beach.jpg', video: '/images/ar-tropical-beach-seamless.mp4' },
-  { name: 'Mandala', slug: 'mandala', image: '/images/ar-mandala-original.jpg', video: '/images/ar-mandala-original.mp4', legacy: true },
+  { name: 'Moonlit Mandala', slug: 'moonlit-mandala', image: '/images/ar-mandala-2g.jpg', video: '/images/ar-mandala-2g.mp4', embeddedLogo: true, newRow: true },
+  { name: 'Mountain Mandala', slug: 'mountain-mandala', image: '/images/ar-mandala-3b.jpg', video: '/images/ar-mandala-3b.mp4', embeddedLogo: true },
+  { name: 'Tropical Mandala', slug: 'tropical-mandala', image: '/images/ar-mandala-1h.jpg', video: '/images/ar-mandala-1h.mp4', embeddedLogo: true },
 ];
 
 const arLogo = '/images/smara-ar-logo.png';
@@ -56,7 +57,7 @@ const maxRecordingSeconds = 60;
 const captureButtonClass = 'grid h-12 w-12 shrink-0 place-items-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
 function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () => void }) {
-  const { name, slug, image, video } = sample;
+  const { name, slug, image, video, embeddedLogo = false } = sample;
   const dialog = useRef<HTMLDialogElement>(null);
   const camera = useRef<HTMLVideoElement>(null);
   const backdropVideo = useRef<HTMLVideoElement>(null);
@@ -141,7 +142,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
     const background = new Image();
     background.src = image;
     const logo = new Image();
-    logo.src = arLogo;
+    if (!embeddedLogo) logo.src = arLogo;
     const leaves = slug === 'moonlit-lotus-pond' ? new Image() : undefined;
     if (leaves) leaves.src = '/images/lotus-foreground-leaves-left-v2.png';
     const rightLeaves = leaves ? new Image() : undefined;
@@ -236,18 +237,20 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           ctx.restore();
         }
       }
-      ctx.save();
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
-      ctx.shadowBlur = 14;
-      const logoHeight = 76;
-      const logoWidth = logoHeight * logo.naturalWidth / logo.naturalHeight;
-      ctx.drawImage(logo, 34, output.height - logoHeight - 34, logoWidth, logoHeight);
-      ctx.restore();
+      if (!embeddedLogo) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+        ctx.shadowBlur = 14;
+        const logoHeight = 76;
+        const logoWidth = logoHeight * logo.naturalWidth / logo.naturalHeight;
+        ctx.drawImage(logo, 34, output.height - logoHeight - 34, logoWidth, logoHeight);
+        ctx.restore();
+      }
     }
 
     async function startSegmentation() {
       try {
-        await Promise.all([background.decode(), logo.decode()]);
+        await Promise.all([background.decode(), embeddedLogo ? Promise.resolve() : logo.decode()]);
         // A missing decorative asset must not stop the camera experience.
         await Promise.all([leaves, rightLeaves].map(sprite => sprite?.decode().catch(() => undefined)));
         if (!active) return;
@@ -275,7 +278,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
       cancelAnimationFrame(animation);
       stopPersonRenderer?.();
     };
-  }, [permission, facing, switching, image, slug]);
+  }, [permission, facing, switching, image, slug, embeddedLogo]);
 
   function startBackdropAudio() {
     const video = backdropVideo.current;
@@ -500,7 +503,7 @@ function CameraExperience({ sample, onClose }: { sample: ArSample; onClose: () =
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {!ready && <img src={arLogo} alt="" className="pointer-events-none absolute bottom-[1.77%] left-[3.15%] z-10 h-[3.96%] w-auto drop-shadow-[0_0_5px_rgba(255,255,255,0.75)]" />}
+        {!ready && !embeddedLogo && <img src={arLogo} alt="" className="pointer-events-none absolute bottom-[1.77%] left-[3.15%] z-10 h-[3.96%] w-auto drop-shadow-[0_0_5px_rgba(255,255,255,0.75)]" />}
         <video ref={camera} muted playsInline className="sr-only" aria-hidden="true" />
         <canvas ref={canvas} width={1080} height={1920} className={`absolute inset-0 h-full w-full ${ready ? '' : 'invisible'}`} aria-hidden="true" />
         {reviewingVideo && (
@@ -579,7 +582,7 @@ function ArExperiencePage() {
         <h1 className="display">Augment Reality (AR) Experience</h1>
         <ul aria-label="AR filter samples" className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
           {arSamples.map((sample) => (
-            <li key={sample.slug} className={`mx-auto w-full max-w-[22rem] min-w-0 ${sample.legacy ? 'col-span-full' : ''}`}>
+            <li key={sample.slug} className={`mx-auto w-full max-w-[22rem] min-w-0 ${sample.newRow ? 'col-start-1' : ''}`}>
               <div className="relative">
               <img
                 src={sample.image}
@@ -629,9 +632,7 @@ function StandaloneCameraPage() {
     <main className="min-h-[100dvh] bg-black text-white">
       <h1 className="sr-only">SMARA AR camera</h1>
       {clientReady && sample
-        ? sample.legacy
-          ? <LegacyMandalaExperience key={sample.slug} image={sample.image} video={sample.video} onClose={() => navigate('/ar-experience/')} />
-          : <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
+        ? <CameraExperience key={sample.slug} sample={sample} onClose={() => navigate('/ar-experience/')} />
         : <p role="status" className="p-6 text-center">Opening your AR experience…</p>}
     </main>
   );
