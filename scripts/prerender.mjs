@@ -19,13 +19,14 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--seo:start--
 
 const { render } = await import(pathToFileURL(serverEntry).href)
 
-const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/ar-camera', '/hiddenpage', '/hiddenpage/camera']
+const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/buy-your-own', '/ar-camera', '/hiddenpage', '/hiddenpage/camera']
 const markers = {
   '/': 'Self-Gaze Meditation Augmented Reality Art',
   '/gallery': 'SMARA Artworks For Sale',
   '/events': 'SMARA Events',
   '/about': 'About SMARA',
   '/ar-experience': 'Augment Reality (AR) Experience',
+  '/buy-your-own': 'Buy your own!',
   '/ar-camera': 'SMARA AR camera',
   '/hiddenpage': 'hidden: working filters',
   '/hiddenpage/camera': 'SMARA AR camera',

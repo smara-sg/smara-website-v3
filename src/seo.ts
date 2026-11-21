@@ -28,6 +28,10 @@ const pages: Record<string, { title: string; description: string }> = {
     description:
       'Join our community for workshops, retreats, and gatherings focused on self-gaze meditation and mindful living.',
   },
+  '/buy-your-own': {
+    title: 'Buy your own! | SMARA',
+    description: 'Explore SMARA filters to collect for your own mindful moments.',
+  },
   '/ar-experience': {
     title: 'Augment Reality (AR) Experience | SMARA',
     description: 'Explore SMARA’s interactive augmented reality camera filters as they become available.',

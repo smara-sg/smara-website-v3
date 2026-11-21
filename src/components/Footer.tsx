@@ -7,6 +7,7 @@ const Footer = () => {
     { to: '/', label: 'Home' },
     { to: '/gallery', label: 'Gallery' },
     { to: '/events', label: 'Events' },
+    { to: '/buy-your-own', label: 'Buy your own!' },
     { to: '/about', label: 'About' },
   ];
 
@@ -85,3 +86,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

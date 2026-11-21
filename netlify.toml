@@ -63,3 +63,8 @@ node_bundler = "esbuild"
   from = "/hiddenpage/media/mountain-mandala.mp4"
   to = "/images/ar-mandala-3b.mp4"
   status = 200
+
+[[redirects]]
+  from = "/buy-your-own"
+  to = "/buy-your-own/index.html"
+  status = 200

@@ -90,6 +90,34 @@ function useWorkingAccess(enabled: boolean) {
   return !enabled || allowed;
 }
 
+function CollectionCards() {
+  return (<ul aria-label="Collect filters" className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
+          {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem] [container-type:inline-size]">
+            <img src={sample.image} alt={sample.name} width={1080} height={1920} loading="lazy" decoding="async" className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+            {'showBrand' in sample && sample.showBrand && <div aria-label="SMARA" className="pointer-events-none absolute bottom-[3%] right-[5%] flex w-[16%] flex-col items-center gap-[1.8cqw] drop-shadow-[0_0_3px_rgba(255,255,255,0.6)]">
+              <img src={arLogo} alt="" width={76} height={144} className="block h-auto w-[42%]" />
+              <span className="text-[3.1cqw] font-normal leading-none tracking-[0.27em] text-white">SMARA</span>
+            </div>}
+            <div className="absolute inset-0 grid place-items-center p-3">
+              <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
+                <ShoppingBasket size={72} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
+              </button>
+            </div>
+          </li>)}
+        </ul>);
+}
+
+function BuyYourOwnPage() {
+  return <div className="min-h-screen bg-white">
+    <main className="mx-auto min-h-[60vh] max-w-5xl px-6 pb-24 pt-24 text-center md:pt-32">
+      <h1 className="display">Buy your own!</h1>
+      <p className="lede mx-auto mt-8 max-w-2xl">Collect a SMARA filter of your own.</p>
+      <CollectionCards />
+    </main>
+    <Footer />
+  </div>;
+}
+
 function ArExperiencePage({ working = false }: { working?: boolean }) {
   const [searchParams] = useSearchParams();
   const [clientReady, setClientReady] = useState(false);
@@ -105,20 +133,7 @@ function ArExperiencePage({ working = false }: { working?: boolean }) {
         <ul aria-label={working ? 'Working AR filters' : 'AR filter samples'} className={working ? 'mx-auto mt-10 grid max-w-xl grid-cols-1 gap-6 min-[480px]:grid-cols-2' : 'mx-auto mt-10 w-full max-w-[22rem] md:max-w-[15rem]'}>
           {(working ? workingArSamples : publicArSamples).map(sample => <ArFilterCard key={sample.slug} sample={sample} onQr={setQrSample} />)}
         </ul>
-        {!working && <ul aria-label="Collect filters" className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
-          {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem] [container-type:inline-size]">
-            <img src={sample.image} alt={sample.name} width={1080} height={1920} loading="lazy" decoding="async" className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
-            {'showBrand' in sample && sample.showBrand && <div aria-label="SMARA" className="pointer-events-none absolute bottom-[3%] right-[5%] flex w-[16%] flex-col items-center gap-[1.8cqw] drop-shadow-[0_0_3px_rgba(255,255,255,0.6)]">
-              <img src={arLogo} alt="" width={76} height={144} className="block h-auto w-[42%]" />
-              <span className="text-[3.1cqw] font-normal leading-none tracking-[0.27em] text-white">SMARA</span>
-            </div>}
-            <div className="absolute inset-0 grid place-items-center p-3">
-              <button type="button" disabled aria-label={`Collect ${sample.name} — purchase link not yet available`} className={overlayClass}>
-                <ShoppingBasket size={72} strokeWidth={1.5} aria-hidden="true" /><span>collect this filter!</span>
-              </button>
-            </div>
-          </li>)}
-        </ul>}
+        {!working && <CollectionCards />}
       </> : <p role="status" className="mt-10">Owner access required. <a href="/hiddenpage/" className="underline">Sign in</a></p>}
       {qrSample && <FilterQrDialog name={qrSample.name} slug={qrSample.slug} onClose={() => setQrSample(null)} />}
     </main><Footer />
@@ -156,6 +171,7 @@ function App() {
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/ar-experience" element={<ArExperiencePage />} />
+        <Route path="/buy-your-own" element={<BuyYourOwnPage />} />
         <Route path="/ar-camera" element={<StandaloneCameraPage />} />
         <Route path="/hiddenpage" element={<ArExperiencePage key="working" working />} />
         <Route path="/hiddenpage/camera" element={<StandaloneCameraPage key="working-camera" working />} />
