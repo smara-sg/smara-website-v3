@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, ShoppingCart, X } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -37,6 +37,16 @@ export default function Navigation() {
           <NavLink to="/about" className={linkClass} onClick={closeMenu}>About</NavLink>
         </div>
 
+        <div className="flex shrink-0 items-center gap-1">
+          <NavLink
+            to="/buy-your-own"
+            aria-label="Cart"
+            title="Buy your own!"
+            onClick={closeMenu}
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full text-ink transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <ShoppingCart size={24} strokeWidth={1.5} aria-hidden="true" />
+          </NavLink>
         <button
           type="button"
           className="inline-flex h-12 w-12 items-center justify-center rounded-full text-ink lg:hidden"
@@ -46,6 +56,7 @@ export default function Navigation() {
         >
           {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
+        </div>
       </div>
 
       {isMenuOpen && (
