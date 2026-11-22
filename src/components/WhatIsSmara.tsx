@@ -33,8 +33,10 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
       <div className="mx-auto mt-16 grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-20">
         <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-mist">
           <OptimizedImage
-            src="/images/smara4.jpg"
-            alt="Self-gaze meditation practice"
+            src="/images/self-gaze-watercolour.webp"
+            alt="Soft watercolour illustration of a young woman gazing at her reflection in a phone, surrounded by leaves and lotus blossoms"
+            width={1448}
+            height={1086}
             fill
           />
         </div>
@@ -64,3 +66,4 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
 };
 
 export default WhatIsSmara;
+
