@@ -55,7 +55,6 @@ export default function DayNightBackdrop() {
         : smoothstep(0.42, 0.92, progress)
       sunsetEl.style.opacity = sunset.toFixed(3)
       nightEl.style.opacity = night.toFixed(3)
-      document.querySelector('.over-landscape')?.classList.toggle('is-night', night >= 0.4)
     }
 
     const onScroll = () => {
@@ -75,7 +74,6 @@ export default function DayNightBackdrop() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
       media.removeEventListener('change', apply)
-      document.querySelector('.over-landscape')?.classList.remove('is-night')
       if (frame) cancelAnimationFrame(frame)
     }
   }, [showLater])
@@ -98,3 +96,4 @@ export default function DayNightBackdrop() {
     </div>
   )
 }
+
