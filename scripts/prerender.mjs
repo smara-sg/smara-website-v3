@@ -22,7 +22,7 @@ const { render } = await import(pathToFileURL(serverEntry).href)
 const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/buy-your-own', '/ar-camera', '/hiddenpage', '/hiddenpage/camera']
 const markers = {
   '/': 'Self-Gaze Meditation Augmented Reality Art',
-  '/gallery': 'SMARA Artworks For Sale',
+  '/gallery': 'SMARA Art',
   '/events': 'SMARA Events',
   '/about': 'About SMARA',
   '/ar-experience': 'Augment Reality (AR) Experience',

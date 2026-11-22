@@ -72,12 +72,10 @@ const GalleryPage = () => {
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-3xl px-6 pb-8 pt-24 text-center md:pt-32">
         <h1 className="display">
-          SMARA Artworks For Sale
+          SMARA Art
         </h1>
         <p className="lede mt-8">
-          SMARA artworks do more than just promote mental wellbeing. They also function as affordable art pieces to beautify homes, offices, hospitals, and schools.
-          <br /><br />
-          Enquire on SMARA artworks at <a href="mailto:hello@smara.online" className="text-accent hover:underline">hello@smara.online</a>.
+          SMARA artworks do more than just promote mental wellbeing. They also function as affordable art pieces to beautify homes, offices, hospitals, and schools. Simply purchase any artwork from our webstore and you get a premium art print as well as a custom AR filter that you can use for practice anytime!
         </p>
       </div>
 

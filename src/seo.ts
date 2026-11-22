@@ -19,9 +19,9 @@ const pages: Record<string, { title: string; description: string }> = {
       'Self-gaze meditation augmented reality art. Discover inner peace as art, music, and your own reflection guide you inward.',
   },
   '/gallery': {
-    title: 'SMARA Artworks For Sale',
+    title: 'SMARA Art',
     description:
-      'SMARA artworks do more than just promote mental wellbeing. They also function as affordable art pieces to beautify homes, offices, hospitals, and schools.',
+      'SMARA artworks do more than just promote mental wellbeing. They also function as affordable art pieces to beautify homes, offices, hospitals, and schools. Simply purchase any artwork from our webstore and you get a premium art print as well as a custom AR filter that you can use for practice anytime!',
   },
   '/events': {
     title: 'SMARA Events',
