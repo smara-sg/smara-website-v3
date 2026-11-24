@@ -1,10 +1,13 @@
 import { imageSizes, type LocalImage } from '../imageSizes'
+import { responsiveImage } from '../responsiveImages'
 
 type Props = {
   src: string
   alt: string
   className?: string
   loading?: 'eager' | 'lazy'
+  sizes?: string
+  fetchPriority?: 'high' | 'low' | 'auto'
   /** Cover a relative or absolute parent. The parent needs a defined size. */
   fill?: boolean
   width?: number
@@ -25,6 +28,8 @@ export default function OptimizedImage({
   alt,
   className,
   loading = 'lazy',
+  sizes = '100vw',
+  fetchPriority = 'auto',
   fill = false,
   width,
   height,
@@ -40,19 +45,31 @@ export default function OptimizedImage({
     ? ['h-full w-full object-cover', className].filter(Boolean).join(' ')
     : className
 
+  const responsive = import.meta.env.DEV ? undefined : responsiveImage(src, w)
+
   const image = (
     <img
-      src={src}
+      src={responsive?.src ?? src}
+      srcSet={responsive?.srcSet}
+      sizes={responsive ? sizes : undefined}
       alt={alt}
       width={w}
       height={h}
       loading={loading}
+      fetchPriority={fetchPriority}
       decoding="async"
       className={imageClass}
+      onError={responsive ? (event) => {
+        const image = event.currentTarget
+        if (image.getAttribute('src') === src) return
+        image.removeAttribute('srcset')
+        image.removeAttribute('sizes')
+        image.src = src
+      } : undefined}
     />
   )
 
-  if (!known?.webp) {
+  if (responsive || !known?.webp) {
     if (!fill) return image
     return <div className="absolute inset-0">{image}</div>
   }
@@ -65,3 +82,4 @@ export default function OptimizedImage({
     </picture>
   )
 }
+

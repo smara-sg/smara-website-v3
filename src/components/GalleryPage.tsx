@@ -83,7 +83,7 @@ const GalleryPage = () => {
         <div className="relative">
           <div className="overflow-hidden rounded-3xl bg-mist">
             <div className="relative aspect-[2/1] bg-mist">
-              {carouselImages.map((image, index) => (
+              {carouselImages.map((image, index) => index === currentCarouselIndex && (
                 <div 
                   key={image.src}
                   className={`absolute inset-0 transition-opacity duration-500 ${
@@ -96,7 +96,9 @@ const GalleryPage = () => {
                     width={image.width}
                     height={image.height}
                     fill
-                    loading={currentCarouselIndex === index ? 'eager' : 'lazy'}
+                    sizes="(min-width: 1152px) 1104px, calc(100vw - 48px)"
+                    fetchPriority="high"
+                    loading="eager"
                   />
                 </div>
               ))}
@@ -152,6 +154,7 @@ const GalleryPage = () => {
               <OptimizedImage
                 src={currentArtwork.image}
                 alt={currentArtwork.title}
+                sizes="(min-width: 1152px) 552px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
                 fill
               />
               

@@ -37,6 +37,7 @@ improving mental well-being and finding a sense of relaxation and calm. With SMA
             alt="Soft watercolour illustration of a young woman gazing at her reflection in a phone, surrounded by leaves and lotus blossoms"
             width={1448}
             height={1086}
+            sizes="(min-width: 1152px) 536px, (min-width: 768px) 50vw, calc(100vw - 40px)"
             fill
           />
         </div>

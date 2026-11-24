@@ -107,6 +107,7 @@ const EventsPage = () => {
                     alt={event.images[currentImageIndex[event.id] ?? 0].alt ?? `${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
                     width={event.images[currentImageIndex[event.id] ?? 0].width}
                     height={event.images[currentImageIndex[event.id] ?? 0].height}
+                    sizes="(min-width: 1152px) 347px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
                     fill
                     className={event.id === 3 ? '!object-contain' : undefined}
                   />

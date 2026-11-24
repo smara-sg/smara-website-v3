@@ -185,6 +185,7 @@ const ArtCardsPage = () => {
                     <OptimizedImage
                       src={card.image}
                       alt={card.title}
+                      sizes="(min-width: 1152px) 350px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
                       fill
                       loading={index === 0 ? 'eager' : 'lazy'}
                     />
@@ -285,3 +286,4 @@ const ArtCardsPage = () => {
 };
 
 export default ArtCardsPage;
+

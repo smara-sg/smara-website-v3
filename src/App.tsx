@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Camera, Link2, QrCode, ShoppingBasket } from 'lucide-react';
 import { Routes, Route, Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FilterQrDialog from './components/FilterQrDialog';
+import OptimizedImage from './components/OptimizedImage';
 import { filterPath } from './ar/filterLinks';
 import { ScrollToTop } from './utils/scrollToTop';
 import Navigation from './components/Navigation';
@@ -57,7 +58,7 @@ const CameraExperience = lazy(() => import('./components/CameraExperience'));
 function ArFilterCard({ sample, onQr }: { sample: ArSample; onQr: (sample: ArSample) => void }) {
   return <li className="mx-auto w-full max-w-[22rem] min-w-0">
     <div className="relative">
-      <img src={sample.image} alt={sample.name} width={1080} height={1920} className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+      <OptimizedImage src={sample.image} alt={sample.name} width={1080} height={1920} sizes="(min-width: 768px) 280px, (min-width: 400px) 352px, calc(100vw - 48px)" className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
       <div className="absolute inset-0 grid place-items-center p-3">
         <a href={filterPath(sample.slug)} target="_blank" rel="noopener noreferrer" aria-label={`click me to experience ${sample.name} (opens in a new tab)`} className={overlayClass}>
           <Camera size={60} strokeWidth={1.5} aria-hidden="true" /><span>click me to experience</span>
@@ -93,7 +94,7 @@ function useWorkingAccess(enabled: boolean) {
 function CollectionCards() {
   return (<ul aria-label="Collect filters" className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 min-[480px]:grid-cols-2 md:grid-cols-3">
           {collectionSamples.map(sample => <li key={sample.name} className="relative mx-auto w-full max-w-[22rem] [container-type:inline-size]">
-            <img src={sample.image} alt={sample.name} width={1080} height={1920} loading="lazy" decoding="async" className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
+            <OptimizedImage src={sample.image} alt={sample.name} width={1080} height={1920} sizes="(min-width: 768px) 240px, (min-width: 480px) 50vw, calc(100vw - 48px)" className="block h-auto w-full rounded-2xl sm:rounded-3xl" />
             {'showBrand' in sample && sample.showBrand && <div aria-label="SMARA" className="pointer-events-none absolute bottom-[3%] right-[5%] flex w-[16%] flex-col items-center gap-[1.8cqw] drop-shadow-[0_0_3px_rgba(255,255,255,0.6)]">
               <img src={arLogo} alt="" width={76} height={144} className="block h-auto w-[42%]" />
               <span className="text-[3.1cqw] font-normal leading-none tracking-[0.27em] text-white">SMARA</span>
