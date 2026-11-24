@@ -227,3 +227,9 @@
   }
 }
 
+
+/* A small press response complements the carousel's gentle image reveal. */
+@media (prefers-reduced-motion: no-preference) {
+  .icon-btn { transition: background-color 180ms, scale 180ms, box-shadow 180ms; }
+  .icon-btn:active { scale: 0.93; box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
+}

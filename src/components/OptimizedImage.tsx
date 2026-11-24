@@ -9,6 +9,8 @@ type Props = {
   sizes?: string
   fetchPriority?: 'high' | 'low' | 'auto'
   objectPosition?: string
+  animateChanges?: boolean
+  nextImage?: { src: string; width?: number }
   /** Cover a relative or absolute parent. The parent needs a defined size. */
   fill?: boolean
   width?: number
@@ -32,10 +34,45 @@ export default function OptimizedImage({
   sizes = '100vw',
   fetchPriority = 'auto',
   objectPosition,
+  animateChanges = false,
+  nextImage,
   fill = false,
   width,
   height,
 }: Props) {
+  const imageRef = useRef<HTMLImageElement>(null)
+  const nextSrc = nextImage?.src
+  const nextWidth = nextImage?.width
+
+  // Warm only the next screen-sized slide, only near a visible carousel.
+  useEffect(() => {
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string }
+    }).connection
+    if (!nextSrc || nextSrc === src || connection?.saveData
+      || /(^|-)2g$/.test(connection?.effectiveType ?? '')
+      || !imageRef.current || !('IntersectionObserver' in window)) return
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      timer = setTimeout(() => {
+        const width = nextWidth ?? knownSize(nextSrc)?.width
+        const variant = !import.meta.env.DEV && width ? responsiveImage(nextSrc, width) : undefined
+        const preload = new Image()
+        preload.decoding = 'async'
+        preload.fetchPriority = 'low'
+        if (variant) {
+          preload.sizes = sizes
+          preload.srcset = variant.srcSet
+        }
+        preload.src = variant?.src ?? nextSrc
+      }, 300)
+    }, { rootMargin: '100px' })
+    observer.observe(imageRef.current)
+    return () => { observer.disconnect(); clearTimeout(timer) }
+  }, [nextSrc, nextWidth, sizes, src])
+
   const known = knownSize(src)
   const w = width ?? known?.width
   const h = height ?? known?.height
@@ -51,6 +88,7 @@ export default function OptimizedImage({
 
   const image = (
     <img
+      ref={imageRef}
       src={responsive?.src ?? src}
       srcSet={responsive?.srcSet}
       sizes={responsive ? sizes : undefined}
@@ -62,6 +100,14 @@ export default function OptimizedImage({
       decoding="async"
       className={imageClass}
       style={objectPosition ? { objectPosition } : undefined}
+      onLoad={animateChanges ? (event) => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+        event.currentTarget.getAnimations().forEach(animation => animation.cancel())
+        event.currentTarget.animate([
+          { opacity: 0.65, transform: 'translateX(12px)' },
+          { opacity: 1, transform: 'translateX(0)' },
+        ], { duration: 360, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' })
+      } : undefined}
       onError={responsive ? (event) => {
         const image = event.currentTarget
         if (image.getAttribute('src') === src) return
@@ -86,3 +132,4 @@ export default function OptimizedImage({
   )
 }
 
+import { useEffect, useRef } from 'react'

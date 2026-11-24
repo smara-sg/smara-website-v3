@@ -83,25 +83,18 @@ const GalleryPage = () => {
         <div className="relative">
           <div className="overflow-hidden rounded-3xl bg-mist">
             <div className="relative aspect-[2/1] bg-mist">
-              {carouselImages.map((image, index) => index === currentCarouselIndex && (
-                <div 
-                  key={image.src}
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    currentCarouselIndex === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  <OptimizedImage
-                    src={image.src}
-                    alt={image.alt}
-                    width={image.width}
-                    height={image.height}
-                    fill
-                    sizes="(min-width: 1152px) 1104px, calc(100vw - 48px)"
-                    fetchPriority="high"
-                    loading="eager"
-                  />
-                </div>
-              ))}
+              <OptimizedImage
+                src={carouselImages[currentCarouselIndex].src}
+                alt={carouselImages[currentCarouselIndex].alt}
+                width={carouselImages[currentCarouselIndex].width}
+                height={carouselImages[currentCarouselIndex].height}
+                nextImage={carouselImages[(currentCarouselIndex + 1) % carouselImages.length]}
+                animateChanges
+                fill
+                sizes="(min-width: 1152px) 1104px, calc(100vw - 48px)"
+                fetchPriority="high"
+                loading="eager"
+              />
             </div>
           </div>
           
@@ -150,9 +143,11 @@ const GalleryPage = () => {
         <div className="overflow-hidden rounded-3xl bg-mist">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Image Section */}
-            <div className="relative h-[28rem] lg:h-[40rem]">
+            <div className="relative h-[28rem] overflow-hidden lg:h-[40rem]">
               <OptimizedImage
                 src={currentArtwork.image}
+                animateChanges
+                nextImage={{ src: artworks[(currentArtworkIndex + 1) % artworks.length].image }}
                 alt={currentArtwork.title}
                 sizes="(min-width: 1152px) 552px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
                 fill

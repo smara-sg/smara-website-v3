@@ -36,7 +36,7 @@ const EventsPage = () => {
     {
       id: 4,
       title: "SMARA @ Toa Payoh Heights Residents' Network",
-      description: "Residents gathered at Toa Payoh Heights RN for a SMARA session exploring art, self-gaze meditation, and mindful awareness. Guided teaching and shared activities created opportunities to pause, participate, and connect.",
+      description: "Residents gathered at Toa Payoh Heights RN for a SMARA session exploring art, self-gaze meditation, and mindful awareness. Guided teaching and shared activities created opportunities to pause, participate, and connect. The event was graced by MP Chee Hong Tat.",
       images: [
         { src: "/images/toa-payoh-heights-teaching.jpg", width: 1600, height: 1200, alt: "Guided SMARA teaching with residents at Toa Payoh Heights RN" },
         { src: "/images/toa-payoh-heights-interaction.jpg", width: 1600, height: 1200, alt: "Participants and facilitators interacting during the SMARA session" },
@@ -122,6 +122,8 @@ const EventsPage = () => {
                     height={event.images[currentImageIndex[event.id] ?? 0].height}
                     sizes="(min-width: 1152px) 347px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
                     fill
+                    animateChanges
+                    nextImage={event.images[((currentImageIndex[event.id] ?? 0) + 1) % event.images.length]}
                     objectPosition={event.images[currentImageIndex[event.id] ?? 0].position ?? '50% 50%'}
                   />
                   
