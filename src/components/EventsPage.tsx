@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
 
-type EventImage = { src: string; width?: number; height?: number; alt?: string }
+type EventImage = { src: string; width?: number; height?: number; alt?: string; position?: string }
 
 const EventsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({
@@ -25,22 +25,35 @@ const EventsPage = () => {
       title: "SMARA @ Punggol Damai",
       description: "Residents of Punggol Damai came together for a morning of SMARA meditation in front of our hand-painted communal wall mural. The session offered a shared space to pause, reflect, and connect through art and mindfulness.",
       images: [
-        {"src": "/images/punggol-damai-session.jpg", "width": 2048, "height": 1152, "alt": "SMARA session in front of the hand-painted communal mural"},
-        {"src": "/images/punggol-damai-meditation.jpg", "width": 2048, "height": 1152, "alt": "Residents taking part in a guided meditation"},
+        {"src": "/images/punggol-damai-session.jpg", "position": "50% 40%", "width": 2048, "height": 1152, "alt": "SMARA session in front of the hand-painted communal mural"},
+        {"src": "/images/punggol-damai-meditation.jpg", "position": "55% 40%", "width": 2048, "height": 1152, "alt": "Residents taking part in a guided meditation"},
         {"src": "/images/punggol-damai-gathering.jpg", "width": 1900, "height": 1069, "alt": "A wider view of the group and mural at Punggol Damai"},
-        {"src": "/images/punggol-damai-phone-experience.jpg", "width": 1066, "height": 1895, "alt": "A close-up of the SMARA mural experience on a participant’s phone"}
+        {"src": "/images/punggol-damai-phone-experience.jpg", "position": "50% 25%", "width": 1066, "height": 1895, "alt": "A close-up of the SMARA mural experience on a participant’s phone"}
       ],
       date: "5 July 2026",
       location: "Punggol Damai"
+    },
+    {
+      id: 4,
+      title: "SMARA @ Toa Payoh Heights Residents' Network",
+      description: "Residents gathered at Toa Payoh Heights RN for a SMARA session exploring art, self-gaze meditation, and mindful awareness. Guided teaching and shared activities created opportunities to pause, participate, and connect.",
+      images: [
+        { src: "/images/toa-payoh-heights-teaching.jpg", width: 1600, height: 1200, alt: "Guided SMARA teaching with residents at Toa Payoh Heights RN" },
+        { src: "/images/toa-payoh-heights-interaction.jpg", width: 1600, height: 1200, alt: "Participants and facilitators interacting during the SMARA session" },
+        { src: "/images/toa-payoh-heights-participation.jpg", width: 1600, height: 1200, alt: "Residents taking part in a standing activity beside the SMARA artwork" },
+        { src: "/images/toa-payoh-heights-session.jpg", width: 1600, height: 1200, alt: "A wider view of residents and their teacher during the SMARA session" }
+      ],
+      date: "14 March 2026",
+      location: "Toa Payoh Heights RN"
     },
     {
       id: 0,
       title: "SMARA @ SAMH",
       description: "A two-day event featuring various mindfulness activities for the neighbourhood elderly. Participants were invited to experience self-gaze meditation sessions, alongside other activities planned by SAMH.",
       images: [
-        { src: "/images/samh1.jpg" },
-        { src: "/images/samh2-upright.jpg", width: 1500, height: 2000 },
-        { src: "/images/samh3-upright.jpg", width: 1500, height: 2000 }
+        { src: "/images/samh1.jpg", position: "50% 40%" },
+        { src: "/images/samh2-upright.jpg", width: 1500, height: 2000, position: "50% 40%" },
+        { src: "/images/samh3-upright.jpg", width: 1500, height: 2000, position: "50% 40%" }
       ],
       date: "June 20–21, 2025",
       location: "SAMH, Mental Wellness for All"
@@ -101,7 +114,7 @@ const EventsPage = () => {
             <div key={event.id} className="overflow-hidden rounded-3xl bg-mist">
               <div className="grid h-full grid-cols-1 gap-0">
                 {/* Image Carousel */}
-                {event.images.length > 0 && <div className={event.id === 3 ? "relative aspect-[4/3]" : "relative h-80 lg:h-96"}>
+                {event.images.length > 0 && <div className="relative aspect-[4/3] overflow-hidden">
                   <OptimizedImage
                     src={event.images[currentImageIndex[event.id] ?? 0].src}
                     alt={event.images[currentImageIndex[event.id] ?? 0].alt ?? `${event.title} - Image ${(currentImageIndex[event.id] ?? 0) + 1}`}
@@ -109,7 +122,7 @@ const EventsPage = () => {
                     height={event.images[currentImageIndex[event.id] ?? 0].height}
                     sizes="(min-width: 1152px) 347px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
                     fill
-                    className={event.id === 3 ? '!object-contain' : undefined}
+                    objectPosition={event.images[currentImageIndex[event.id] ?? 0].position ?? '50% 50%'}
                   />
                   
                   {/* Carousel Controls */}

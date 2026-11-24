@@ -8,6 +8,7 @@ type Props = {
   loading?: 'eager' | 'lazy'
   sizes?: string
   fetchPriority?: 'high' | 'low' | 'auto'
+  objectPosition?: string
   /** Cover a relative or absolute parent. The parent needs a defined size. */
   fill?: boolean
   width?: number
@@ -30,6 +31,7 @@ export default function OptimizedImage({
   loading = 'lazy',
   sizes = '100vw',
   fetchPriority = 'auto',
+  objectPosition,
   fill = false,
   width,
   height,
@@ -59,6 +61,7 @@ export default function OptimizedImage({
       fetchPriority={fetchPriority}
       decoding="async"
       className={imageClass}
+      style={objectPosition ? { objectPosition } : undefined}
       onError={responsive ? (event) => {
         const image = event.currentTarget
         if (image.getAttribute('src') === src) return

@@ -2,7 +2,7 @@
 
 Source folder: https://drive.google.com/drive/folders/1Nuqpt8Dk3mx9wz-Hh4hrWQBWeDGKZZhR
 
-Four photos selected from the folder’s 41 JPG files for the event carousel. Originals are copied unchanged, with full-image fitting to preserve participants and the mural.
+Four photos selected from the folder’s 41 JPG files for the event carousel. Image files are unchanged. The shared event carousel now fills a 4:3 frame with individual focal positions, including a higher crop on the portrait phone photo to keep the phone experience visible.
 
 | Website file | Drive original | View |
 | --- | --- | --- |
