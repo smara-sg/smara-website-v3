@@ -64,7 +64,7 @@ const AboutPage = () => {
     {
       name: "Alvin Goh",
       role: "Artist & AR Developer",
-      description: "Alvin brings the visual magic to life, creating the beautiful AR filters and animations that transform your meditation experience into an artistic journey.",
+      description: "Alvin brings the visual magic to life, creating the beautiful AR filters and animations that transform your meditation experience into an artistic journey. Drawing on his illustration experience and keen eye for colour, composition, and detail, he shapes each visual into a thoughtful balance of beauty and calm.",
       image: "/images/alvinpfp.jpeg"
     },
     {
