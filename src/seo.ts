@@ -1,6 +1,6 @@
 export const SITE_URL = 'https://smara.online'
-export const OG_IMAGE = `${SITE_URL}/images/og-image.jpg`
-export const OG_IMAGE_ALT = 'Self-gaze meditation practice'
+export const OG_IMAGE = `${SITE_URL}/images/og-seaside-smara-v2.jpg`
+export const OG_IMAGE_ALT = 'SMARA seaside watercolour — A little art. A moment of calm.'
 
 export type PageHead = {
   title: string
