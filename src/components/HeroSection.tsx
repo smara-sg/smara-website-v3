@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 const HeroSection = () => {
   return (
     <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden md:min-h-[calc(100svh-3.5rem)]">
@@ -15,9 +13,6 @@ const HeroSection = () => {
         <h3 className="mx-auto mt-6 max-w-xl text-balance text-lg font-normal leading-relaxed text-[#2c2c2e] md:text-xl">
           Discover inner peace as art, music, and your own reflection guide you inward.
         </h3>
-        <Link to="/gallery" className="btn-primary mt-10">
-          Artwork
-        </Link>
       </div>
     </section>
   );
