@@ -42,7 +42,7 @@ const pages: Record<string, { title: string; description: string }> = {
   },
   '/hiddenpage': { title: 'hidden: working filters | SMARA', description: 'Owner working filters.' },
   '/hiddenpage/camera': { title: 'Working AR Camera | SMARA', description: 'Owner AR camera.' },
-  '/account': { title: 'Your SMARA Account', description: 'Sign in or create your SMARA account.' },
+  '/account': { title: 'Your SMARA Account', description: 'Create your free SMARA account and unlock Moonlit Mandala, an exclusive free AR filter.' },
   '/my-filters': { title: 'My filters | SMARA', description: 'Your personal SMARA filter collection.' },
   '/my-filters/camera': { title: 'Your AR experience | SMARA', description: 'Your purchased SMARA experience.' },
   '/about': {

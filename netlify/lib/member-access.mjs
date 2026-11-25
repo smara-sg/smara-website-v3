@@ -1,5 +1,5 @@
 export const SESSION_COOKIE = '__Host-smara-member';
-export const PAID_FILTERS = new Set(['moonlit-mandala', 'mountain-mandala', 'waterfall-kingfisher']);
+export const MEMBER_FILTERS = new Set(['moonlit-mandala', 'mountain-mandala', 'waterfall-kingfisher']);
 export const privateHeaders = {
   'Content-Type': 'application/json', 'Cache-Control': 'private, no-store',
   'CDN-Cache-Control': 'no-store', 'Netlify-CDN-Cache-Control': 'no-store',
@@ -33,11 +33,11 @@ export function createMemberService({ url, key, fetcher = fetch }) {
       if (!response.ok) return null;
       const rows = await response.json();
       if (!Array.isArray(rows)) return null;
-      return [...new Set(rows.map(row => row.filter_slug).filter(slug => PAID_FILTERS.has(slug)))];
+      return [...new Set(rows.map(row => row.filter_slug).filter(slug => MEMBER_FILTERS.has(slug)))];
     } catch { return null; }
   }
   return { configured, user, filters, async allowed(token, slug) {
-    if (!PAID_FILTERS.has(slug)) return false;
+    if (!MEMBER_FILTERS.has(slug)) return false;
     return (await filters(token))?.includes(slug) ?? false;
   } };
 }

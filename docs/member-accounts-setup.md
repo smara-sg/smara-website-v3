@@ -14,7 +14,7 @@ Prepared 25 November 2026. Existing public sample camera and the owner's Basic-a
 ## Required owner setup before activation
 
 1. Create or select a Supabase **Free** project, preferably in Singapore. Creating the account, accepting terms and entering database credentials must be completed by the owner. Do not commit any credentials.
-2. Run `supabase/migrations/202611250001_member_filter_access.sql` in its SQL editor. Confirm RLS is enabled and that anonymous/authenticated users cannot insert, update or delete grants.
+2. Run `supabase/migrations/202611250001_member_filter_access.sql`, then `202611250002_free_moonlit_welcome.sql` in its SQL editor. Confirm RLS is enabled and that anonymous/authenticated users cannot insert, update or delete grants. The second migration grants **Moonlit Mandala** as the exclusive free account welcome gift after email confirmation, including verified Google/Facebook users. It also backfills confirmed members. Existing grants and revocations are preserved; browser metadata cannot choose or grant a gift.
 3. Set Supabase Auth Site URL to `https://smara.online`; allow `https://smara.online/account/` as the callback URL. Preserve the callback query string. Enable email confirmation. Set minimum password length to at least 10 on the server too.
 4. Configure custom SMTP, e.g. the existing Resend service and a verified `smara.online` sender. Supabase's default sender is only for testing and cannot deliver public sign-ups. Test confirmations and password recovery to an external address.
 5. Google: create an OAuth web client in the owner's Google Cloud project; use the project's exact Supabase `/auth/v1/callback` URL. Enable the provider in Supabase with its client ID and secret. Publish the Google consent configuration for the intended audience. Request only basic identity/email scope.
@@ -24,7 +24,11 @@ Prepared 25 November 2026. Existing public sample camera and the owner's Basic-a
 
 ## Required real-project validation
 
-Create two test accounts. Grant only account A one filter in the owner's database. A must see/open that filter, and B must receive no rows and be denied direct MP4 access even with A's shared URL. Verify anonymous requests, revoked grants, expired grants, expired sessions, login refresh, sign-out, Range requests, Google, Facebook, email confirmation, and password recovery. Automated mocks validate failure handling but cannot prove a project's live RLS/provider/SMTP settings.
+Create two test accounts. Both must receive Moonlit Mandala automatically only after confirmation. Grant only account A **Mountain Mandala** in the owner's database. A must see/open Mountain Mandala, and B must receive no grant for it and be denied its direct MP4 even with A's shared URL. An unconfirmed account must not get the gift. Repeating confirmation or login must not duplicate a gift or restore a revoked grant. Verify anonymous requests, revoked grants, expired grants, expired sessions, login refresh, sign-out, Range requests, Google, Facebook, email confirmation, and password recovery. Automated mocks validate failure handling but cannot prove a project's live RLS/provider/SMTP settings.
+
+## Free-account offer
+
+The owner selected **Moonlit Mandala** as the exclusive free filter for free account holders. The sign-up heading, tabs, submit button, navigation labels and locked collection prompt now say “free account”. The offer reads: “Create your free account and unlock Moonlit Mandala — an exclusive free AR filter, just for members. No purchase needed.” It is the member welcome gift, not a payment-dependent unlock. The gift still requires a confirmed account and retains server-side media protection. The offer remains in the unpublished account-system draft until backend setup and real-project validation are complete.
 
 ## Purchase integration remains separate
 
