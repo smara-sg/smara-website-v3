@@ -36,7 +36,7 @@ const Testimonials = () => {
     <section className="section">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="display on-painting">What People Are Saying</h2>
-        <p className="lede on-painting mt-8">
+        <p className="lede on-painting mt-8 text-white [text-shadow:0_1px_5px_rgba(0,0,0,0.3)]">
           Hear from our community of mindfulness practitioners and art lovers
         </p>
       </div>
@@ -60,3 +60,4 @@ const Testimonials = () => {
 };
 
 export default Testimonials;
+
