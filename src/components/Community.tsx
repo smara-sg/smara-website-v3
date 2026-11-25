@@ -64,10 +64,10 @@ const Community = () => {
         </form>
 
         {submitStatus === 'success' && (
-          <p className="mt-6 text-ink">Thank you for subscribing! We'll keep you updated on new AR filters and events.</p>
+          <p className="on-painting mt-6 text-ink">Thank you for subscribing! We'll keep you updated on new AR filters and events.</p>
         )}
         {submitStatus === 'error' && (
-          <p className="mt-6 text-ink">Sorry, there was an error subscribing. Please try again later.</p>
+          <p className="on-painting mt-6 text-ink">Sorry, there was an error subscribing. Please try again later.</p>
         )}
 
         <div className="on-painting mt-10 flex justify-center gap-8 text-sm">
@@ -84,3 +84,4 @@ const Community = () => {
 };
 
 export default Community;
+
