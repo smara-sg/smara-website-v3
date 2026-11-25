@@ -147,12 +147,20 @@
   color: #1d1d1f;
 }
 
+.glass:is(.text-mute, .lede, .text-accent),
 .glass :is(.text-mute, .lede, .text-accent) {
   color: #3a3a3c;
 }
 
+/* Fixed colours keep floating copy readable throughout the landscape transition. */
+.over-landscape .on-painting,
+.over-landscape .on-painting a {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 14px rgba(0, 0, 0, 0.5);
+}
+
 .over-landscape footer {
-  background-color: rgba(10, 20, 40, 0.62);
+  background-color: rgba(10, 20, 40, 0.88);
   color: #f7f7f8;
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -163,7 +171,7 @@
 
 .over-landscape footer :is(.text-mute, a),
 .over-landscape footer a:hover {
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .over-landscape footer .border-line {

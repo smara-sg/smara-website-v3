@@ -13,7 +13,7 @@ export default function Navigation() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 lg:h-14 lg:px-6">
         <NavLink
           to="/"
