@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, Mail } from 'lucide-react';
+import { Heart, Instagram, Mail } from 'lucide-react';
 import Footer from './Footer';
 import OptimizedImage from './OptimizedImage';
 
@@ -132,7 +132,17 @@ ties.
                 <div className="text-center">
                   <h3 className="text-lg font-medium text-ink">{member.name}</h3>
                   <p className="mt-1 text-sm text-accent">{member.role}</p>
-                  <p className="mt-4 text-sm leading-relaxed text-mute">{member.description}</p>
+                  <p className="mt-4 text-left text-sm leading-relaxed text-mute">{member.description}</p>
+                  {member.name === 'Alvin Goh' && <a
+                    href="https://www.instagram.com/verytallartguy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="verytallartguy on Instagram (opens in a new tab)"
+                    className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-mute transition-colors hover:border-ink/30 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  >
+                    <Instagram size={18} strokeWidth={1.5} aria-hidden="true" />
+                    <span>verytallartguy</span>
+                  </a>}
                 </div>
               </div>
             </div>
