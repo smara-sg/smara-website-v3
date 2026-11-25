@@ -7,7 +7,7 @@ function secureHeaders(headers = new Headers()) {
   headers.set('Cache-Control', 'private, no-store, max-age=0');
   headers.set('CDN-Cache-Control', 'no-store');
   headers.set('Netlify-CDN-Cache-Control', 'no-store');
-  headers.set('Vary', [headers.get('Vary'), 'Authorization'].filter(Boolean).join(', '));
+  headers.set('Vary', [headers.get('Vary'), 'Authorization', 'Cookie'].filter(Boolean).join(', '));
   headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   headers.set('Referrer-Policy', 'no-referrer');
   headers.set('X-Content-Type-Options', 'nosniff');
@@ -29,7 +29,16 @@ async function authorized(request, owner) {
   for (let i = 0; i < digest.length; i++) difference |= digest[i] ^ expected[i];
   return difference === 0;
 }
-export function createWorkingFilterGate(owner) {
+async function memberAllowed(request, slug) {
+  const token = cookieToken(request.headers.get('Cookie'));
+  if (!token) return false;
+  const service = createMemberService({
+    url: globalThis.Netlify?.env?.get('SUPABASE_URL'),
+    key: globalThis.Netlify?.env?.get('SUPABASE_PUBLISHABLE_KEY'),
+  });
+  return service.allowed(token, slug);
+}
+export function createWorkingFilterGate(owner, allowMember = memberAllowed) {
   return async (request, context) => {
     const url = new URL(request.url);
     let path;
@@ -48,7 +57,10 @@ export function createWorkingFilterGate(owner) {
     const protectedPath = path === '/hiddenpage' || path.startsWith('/hiddenpage/')
       || /^\/images\/ar-mandala-(2g|3b)\.mp4$/.test(path);
     if (!protectedPath) return context.next();
-    if (!await authorized(request, owner)) {
+    const mediaSlug = path === '/images/ar-mandala-2g.mp4' ? 'moonlit-mandala' : path === '/images/ar-mandala-3b.mp4' ? 'mountain-mandala' : null;
+    const ownerAccess = await authorized(request, owner);
+    const customerAccess = !ownerAccess && mediaSlug && await allowMember(request, mediaSlug);
+    if (!customerAccess && !ownerAccess) {
       const headers = secureHeaders(new Headers({
         'WWW-Authenticate': 'Basic realm="SMARA working filters", charset="UTF-8"',
         'Content-Type': 'text/html; charset=utf-8',
@@ -67,3 +79,4 @@ export function createWorkingFilterGate(owner) {
 export default createWorkingFilterGate(owner);
 export const config = { path: '/*' };
 
+import { cookieToken, createMemberService } from '../lib/member-access.mjs';

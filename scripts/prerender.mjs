@@ -19,8 +19,11 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--seo:start--
 
 const { render } = await import(pathToFileURL(serverEntry).href)
 
-const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/buy-your-own', '/ar-camera', '/hiddenpage', '/hiddenpage/camera']
+const routes = ['/', '/gallery', '/events', '/about', '/art-cards', '/ar-experience', '/buy-your-own', '/ar-camera', '/hiddenpage', '/hiddenpage/camera', '/account', '/my-filters', '/my-filters/camera']
 const markers = {
+  '/account': 'Welcome back',
+  '/my-filters': 'My filters',
+  '/my-filters/camera': 'Checking your account',
   '/': 'Self-Gaze Meditation Augmented Reality Art',
   '/gallery': 'SMARA Art',
   '/events': 'SMARA Events',

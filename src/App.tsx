@@ -19,6 +19,10 @@ import NotFoundPage from './components/NotFoundPage';
 import PageSeo from './components/PageSeo';
 import Footer from './components/Footer';
 import DayNightBackdrop from './components/DayNightBackdrop';
+import AuthProvider from './auth/AuthProvider';
+import AccountPage from './components/AccountPage';
+import MyFiltersPage, { MemberAccess } from './components/MyFiltersPage';
+import { memberSamples } from './auth/filterCatalog';
 
 function Home() {
   return (
@@ -161,8 +165,9 @@ function StandaloneCameraPage({ working = false }: { working?: boolean }) {
 
 function App() {
   const { pathname } = useLocation();
-  const cameraPage = ['/ar-camera', '/hiddenpage/camera'].includes(pathname.replace(/\/$/, ''));
+  const cameraPage = ['/ar-camera', '/hiddenpage/camera', '/my-filters/camera'].includes(pathname.replace(/\/$/, ''));
   return (
+    <AuthProvider>
     <div className="min-h-screen">
       <PageSeo />
       {!cameraPage && <Navigation />}
@@ -177,14 +182,30 @@ function App() {
         <Route path="/hiddenpage" element={<ArExperiencePage key="working" working />} />
         <Route path="/hiddenpage/camera" element={<StandaloneCameraPage key="working-camera" working />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="/my-filters" element={<MyFiltersPage />} />
+        <Route path="/my-filters/camera" element={<MemberCameraPage />} />
         <Route path="/art-cards" element={<ArtCardsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
+    </AuthProvider>
   );
 }
 
 export default App;
+
+function MemberCameraPage() {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const sample = memberSamples.find(value => value.slug === params.get('filter'));
+  return <main className="min-h-[100dvh] bg-white text-ink">
+    <h1 className="sr-only">SMARA AR camera</h1>
+    <MemberAccess filter={sample?.slug ?? 'unknown'}>
+      {sample && <Suspense fallback={<p role="status" className="p-8 text-center">Opening your AR experience…</p>}><CameraExperience sample={sample} onClose={() => navigate('/my-filters/')} /></Suspense>}
+    </MemberAccess>
+  </main>;
+}
 
 
 

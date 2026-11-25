@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, ShoppingCart, X } from 'lucide-react';
+import { Menu, ShoppingCart, UserRound, X } from 'lucide-react';
+import { useAuth } from '../auth/context';
 import OptimizedImage from './OptimizedImage';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -9,6 +10,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function Navigation() {
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
 
@@ -38,6 +40,9 @@ export default function Navigation() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <NavLink to={user ? '/my-filters/' : '/account/'} onClick={closeMenu} aria-label={user ? 'My account and filters' : 'Sign in / Create account'} title={user ? 'My filters' : 'Sign in'} className="inline-flex h-12 w-12 items-center justify-center rounded-full text-ink transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+            <UserRound size={22} strokeWidth={1.5} aria-hidden="true" />
+          </NavLink>
           <NavLink
             to="/buy-your-own"
             aria-label="Cart"
@@ -67,6 +72,8 @@ export default function Navigation() {
             <NavLink to="/ar-experience" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Augment Reality (AR) Experience</NavLink>
             <NavLink to="/buy-your-own" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>Buy your own!</NavLink>
             <NavLink to="/about" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>About</NavLink>
+            <NavLink to="/my-filters" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>My filters</NavLink>
+            <NavLink to="/account" className="rounded-xl px-3 py-3 text-lg text-ink" onClick={closeMenu}>{user ? 'My account' : 'Sign in / Create account'}</NavLink>
           </div>
         </div>
       )}

@@ -42,6 +42,9 @@ const pages: Record<string, { title: string; description: string }> = {
   },
   '/hiddenpage': { title: 'hidden: working filters | SMARA', description: 'Owner working filters.' },
   '/hiddenpage/camera': { title: 'Working AR Camera | SMARA', description: 'Owner AR camera.' },
+  '/account': { title: 'Your SMARA Account', description: 'Sign in or create your SMARA account.' },
+  '/my-filters': { title: 'My filters | SMARA', description: 'Your personal SMARA filter collection.' },
+  '/my-filters/camera': { title: 'Your AR experience | SMARA', description: 'Your purchased SMARA experience.' },
   '/about': {
     title: 'About SMARA',
     description:
@@ -81,7 +84,7 @@ export function pageHead(pathname: string): PageHead {
     description: page.description,
     // Netlify serves directory indexes at a trailing slash (/gallery → 301 /gallery/).
     canonical: `${SITE_URL}${path === '/' ? '/' : `${path}/`}`,
-    noindex: path === '/ar-camera' || path.startsWith('/hiddenpage'),
+    noindex: path === '/ar-camera' || path === '/account' || path.startsWith('/my-filters') || path.startsWith('/hiddenpage'),
     preloadHero: path === '/',
     image: OG_IMAGE,
     imageAlt: OG_IMAGE_ALT,
